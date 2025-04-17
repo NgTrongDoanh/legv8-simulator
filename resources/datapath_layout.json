@@ -1,0 +1,162 @@
+{
+    "canvasSize": {"width": 1600, "height": 900}, 
+    "components": [
+      {
+        "id": "PC", 
+        "asset": "program_counter.png",
+        "label": "Program Counter",
+        "x": 100, "y": 530, "width": 50, "height": 100,
+        "connectionPoints": {
+            "in": {"x": 100, "y": 580, "name": ""}, 
+            "out_1": {"x": 150, "y": 580, "name": ""},   
+            "out_2": {"x": 150, "y": 580, "name": ""}, 
+            "out_3": {"x": 150, "y": 580, "name": ""} 
+        }
+      },
+      {
+        "id": "IMEM", 
+        "asset": "instruction_memory.png",
+        "label": "Instruction Memory",
+        "x": 190, "y": 555, "width": 120, "height": 180,
+        "connectionPoints": {
+          "in": {"x": 190, "y": 580, "name": "Read address"}, 
+          "out": {"x": 310, "y": 645, "name": "Instruction\n[31-0]"}
+        }
+      },
+      {
+        "id": "SP", 
+        "asset": "splitter.png",
+        "label": "S\np\nl\ni\nt\nt\ne\nr",
+        "x": 370, "y": 520, "width": 25, "height": 240,
+        "connectionPoints": {
+          "in": {"x": 370, "y": 645, "name": ""}, 
+          "out1": {"x": 383, "y": 520, "name": "Instruction\n[31-21]"},
+          "out2": {"x": 395, "y": 565, "name": "Instruction\n[9-5]"},
+          "out3": {"x": 395, "y": 600, "name": "Instruction\n[20-16]"},
+          "out4_1": {"x": 395, "y": 690, "name": "Instruction\n[4-0]"},
+          "out4_2": {"x": 395, "y": 690, "name": ""},
+          "out5": {"x": 395, "y": 750, "name": "Instruction\n[31-0]"},
+          "out6": {"x": 383, "y": 760, "name": "Instruction\n[31-21]"}
+        }
+      },
+      {
+        "id": "ID_MUX_REGDST", 
+        "asset": "multiplexer.png",
+        "label": "M\nU\nX",
+        "x": 500, "y": 575, "width": 40, "height": 100,
+        "connectionPoints": {
+          "in0": {"x": 500, "y": 600, "name": "0"}, // Dau vao ung voi tin hieu 0
+          "in1": {"x": 500, "y": 655, "name": "1"}, // Dau vao ung voi tin hieu 1
+          "out": {"x": 540, "y": 625, "name": ""}
+        }
+      },
+      {
+        "id": "REG_FILE", 
+        "asset": "registers_file.png",
+        "label": "Registers",
+        "x": 570, "y": 540, "width": 145, "height": 205,
+        "connectionPoints": {
+          "in1": {"x": 570, "y": 565, "name": "Read\nregester 1"}, 
+          "in2": {"x": 570, "y": 625, "name": "Read\nregester 2"},
+          "in3": {"x": 570, "y": 690, "name": "Write\nregester"},
+          "in4": {"x": 570, "y": 730, "name": "Read\ndata"},
+          "out1": {"x": 715, "y": 600, "name": "Read\ndata 1"},
+          "out2_1": {"x": 715, "y": 670, "name": "Read\ndata 2"},
+          "out2_2": {"x": 715, "y": 670, "name": ""}
+        }
+      },
+      {
+        "id": "SIGN_EXTEND", 
+        "asset": "sign_extend.png",
+        "label": "Sign-\nextend",
+        "x": 615, "y": 795, "width": 85, "height": 110,
+        "connectionPoints": {
+          "in": {"x": 615, "y": 845, "name": "32"}, 
+          "out_1": {"x": 760, "y": 845, "name": "64"},
+          "out_2": {"x": 760, "y": 845, "name": ""}
+        }
+      },
+      {
+        "id": "ID_CTRL", 
+        "asset": "control_unit.png",
+        "label": "Control",
+        "x": 495, "y": 300, "width": 90, "height": 230,
+        "connectionPoints": {
+          "in": {"x": 495, "y": 415, "name": ""}, 
+          "out1": {"x": 560, "y": 315, "name": "Reg2Loc"},
+          "out2": {"x": 570, "y": 335, "name": "UncondBranch"},
+          "out3": {"x": 575, "y": 355, "name": "FlagBranch"},
+          "out4": {"x": 580, "y": 375, "name": "ZeroBranch"},
+          "out5": {"x": 583, "y": 395, "name": "MemRead"},
+          "out6": {"x": 585, "y": 415, "name": "MemToReg"},
+          "out7": {"x": 583, "y": 435, "name": "MemWrite"},
+          "out8": {"x": 580, "y": 455, "name": "FlagWrite"},
+          "out9": {"x": 575, "y": 475, "name": "ALUSrc"},
+          "out10": {"x": 570, "y": 495, "name": "ALUOp"},
+          "out11": {"x": 560, "y": 515, "name": "RegWrite"}
+        }
+      },
+      {
+        "id": "EX_MUX_ALUSRC", 
+        "asset": "multiplexer.png",
+        "label": "M\nU\nX",
+        "x": 785, "y": 645, "width": 40, "height": 100,
+        "connectionPoints": {
+          "in0": {"x": 785, "y": 670, "name": "0"}, 
+          "in1": {"x": 785, "y": 725, "name": "1"},
+          "out": {"x": 825, "y": 695, "name": ""}
+        }
+      },
+      {
+        "id": "EX_ALU", 
+        "asset": "multiplexer.png",
+        "label": "M\nU\nX",
+        "x": 785, "y": 645, "width": 40, "height": 100,
+        "connectionPoints": {
+          "in0": {"x": 785, "y": 670, "name": "0"}, 
+          "in1": {"x": 785, "y": 725, "name": "1"},
+          "out": {"x": 825, "y": 695, "name": ""}
+        }
+      },
+      
+      // ... các components khác ...
+      {
+        "id": "EX_ALU",
+        "asset": "alu.png",
+        "label": "ALU",
+        "x": 350, "y": 200, "width": 100, "height": 120,
+        "connectionPoints": {
+           "inA": {"x": 0, "y": 30},
+           "inB": {"x": 0, "y": 90},
+           "result": {"x": 100, "y": 60},
+           "zero": {"x": 50, "y": 120} // Điểm ra tín hiệu Zero
+        }
+      }
+    ],
+    "buses": [
+      {
+        "id": "PC_IMEM_ADDR", // Phải khớp BusID.PC_IMEM_ADDR.name()
+        "path": [
+          {"component": "PC", "point": "out"}, // Điểm bắt đầu
+          {"x": 100, "y": 275},                 // Điểm uốn (ví dụ)
+          {"component": "IMEM", "point": "addressInput"} // Điểm kết thúc
+        ],
+        "color": "#0000FF", // Màu xanh cho bus địa chỉ (ví dụ)
+        "thickness": 2
+      },
+      // ... các buses khác ...
+      {
+         "id": "ALU_OUT_RESULT",
+         "path": [
+           {"component": "EX_ALU", "point": "result"},
+           // Điểm chia nhánh đến DataMem và Mux WB
+           {"x": 480, "y": 260},
+           {"component": "MEM_DATA", "point": "addressInput"}, // Nhánh 1
+           {"moveTo": {"x": 480, "y": 260}}, // Quay lại điểm chia
+           {"component": "WB_MUX_MEMWB", "point": "input0"} // Nhánh 2 (giả sử input 0 là ALU)
+         ],
+         "color": "#000000",
+         "thickness": 3
+      }
+    ]
+  }

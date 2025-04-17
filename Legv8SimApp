@@ -1,0 +1,74 @@
+// --- START OF (Modified) src/simulator/gui/Legv8SimApp.java ---
+package simulator.gui;
+
+// ... imports ...
+import simulator.instructions.Instruction; // Cần Instruction
+import java.util.List; // Cần List
+
+public class Legv8SimApp extends JFrame implements ActionListener {
+    // ... fields (bao gồm simulationView = null;) ...
+    private List<Instruction> loadedInstructions = null; // Giữ lại danh sách lệnh mới nhất
+    private boolean assemblyReady = false; // Cờ trạng thái assembly
+
+    // ... Constructor, initComponents, layoutComponents, actionPerformed ...
+    // ... loadInstructionConfig, loadAssemblyFileIntoEditor, openAssemblyEditor ...
+
+    // --- SỬA assembleCode ---
+    public void assembleCode(List<String> codeLines, String sourceName) {
+         if (!configReady) {
+             lblStatus.setText("Status: Error - Config not loaded.");
+             // Hiển thị lỗi cho người dùng nếu cần
+             JOptionPane.showMessageDialog(this, "Instruction Configuration not loaded!", "Error", JOptionPane.ERROR_MESSAGE);
+             return;
+         }
+         // Reset trạng thái assembly trước khi thử lại
+         assemblyReady = false;
+         loadedInstructions = null;
+         updateSimulationButtonState(); // Cập nhật nút Start Sim (sẽ bị disable)
+
+         try {
+             assembler.reset();
+             // Thực hiện assemble
+             List<Instruction> newlyAssembled = assembler.assemble(codeLines); // Lưu vào biến tạm
+
+             // Assemble thành công
+             loadedInstructions = newlyAssembled; // Lưu lại kết quả mới nhất
+             assemblyReady = true;
+             lblStatus.setText("Status: Assembly successful (" + sourceName + "). Ready.");
+             System.out.println("Assembly successful from " + sourceName + ". " + loadedInstructions.size() + " instructions.");
+
+             // *** THÊM LOGIC GỌI RELOAD VIEW ***
+             // Nếu SimulationView đang mở, yêu cầu nó reload lệnh mới
+             if (simulationView != null && simulationView.isVisible()) {
+                 System.out.println("Legv8SimApp: Notifying SimulationView to reload instructions...");
+                 simulationView.reloadInstructions(loadedInstructions); // Gọi hàm mới của view
+             }
+             // *** KẾT THÚC THÊM LOGIC ***
+
+         } catch (AssemblyException e) {
+             assemblyReady = false;
+             loadedInstructions = null;
+             // Hiển thị lỗi chi tiết (như cũ)
+             JTextArea textArea = new JTextArea(e.getMessage()); /*...*/ JScrollPane scrollPane = new JScrollPane(textArea); /*...*/
+             JOptionPane.showMessageDialog(this, scrollPane, "Assembly Errors (" + sourceName + ")", JOptionPane.ERROR_MESSAGE);
+             lblStatus.setText("Status: Assembly failed (" + sourceName + ").");
+             System.err.println("Assembly failed.");
+         } catch (Exception e) {
+             assemblyReady = false;
+             loadedInstructions = null;
+             JOptionPane.showMessageDialog(this, "An unexpected error occurred during assembly:\n" + e.getMessage(), "Assembly Error", JOptionPane.ERROR_MESSAGE);
+             lblStatus.setText("Status: Unexpected assembly error.");
+             e.printStackTrace();
+         }
+         // Cập nhật lại trạng thái nút Start Simulation sau khi assemble xong (thành công hoặc thất bại)
+         updateSimulationButtonState();
+    }
+    // --- KẾT THÚC SỬA assembleCode ---
+
+    // startSimulation giữ nguyên logic (nó sẽ dùng loadedInstructions mới nhất nếu được gọi)
+    // updateSimulationButtonState giữ nguyên
+    // handleExit giữ nguyên
+    // main giữ nguyên
+}
+// --- END OF FILE ---
+
