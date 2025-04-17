@@ -18,7 +18,10 @@ public enum ComponentID {
     BR_SHIFT_LEFT, // Shifter tính Branch Offset << 2
     BR_ADD_TARGET, // Adder tính Branch Target Address (PC + Offset)
     BR_MUX_PCSrc,  // Mux chọn Next PC (PC+4 vs Branch Target vs Jump Target)
-    NZCV_FLAGS,    // Khối hiển thị cờ N,Z,C,V
+    N_FLAGS,    // Khối hiển thị cờ N
+    Z_FLAGS,    // Khối hiển thị cờ Z
+    C_FLAGS,    // Khối hiển thị cờ C,V
+    V_FLAGS,    // Khối hiển thị cờ N,Z,C,V
     // Thêm các cổng logic nếu muốn highlight riêng:
     BRANCH_AND_GATE, // Cổng AND kiểm tra Zero/Control cho branch
     BRANCH_OR_GATE   // Cổng OR tổng hợp các tín hiệu branch

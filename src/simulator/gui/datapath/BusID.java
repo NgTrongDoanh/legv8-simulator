@@ -36,6 +36,15 @@ public enum BusID {
     BRANCH_TARGET_ADDR,// Output từ Adder tính địa chỉ nhánh
     PC_SRC_MUX_OUT,   // Output của Mux chọn PC tiếp theo
     PC_IN,            // Input vào PC (từ Mux chọn PC)
+    PC_ADD4,
+    PC_ADD_OFFSET,
+    //Splitter
+    IMEM_SP,
+    SP_CTRL,
+    SP_REG_1,
+    SP_MUX_0,
+    SP_MUX_1,
+    SP_REG_2,
     // Control Signals (Có thể vẽ các đường riêng nếu muốn)
     CTRL_REGWRITE, CTRL_ALUSRC, CTRL_MEMWRITE, CTRL_MEMREAD, CTRL_MEMTOREG,
     CTRL_ZEROBRANCH, CTRL_FLAGBRANCH, CTRL_UNCONDBRANCH, CTRL_FLAGWRITE
