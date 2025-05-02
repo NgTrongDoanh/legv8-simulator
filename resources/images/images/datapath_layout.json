@@ -1,0 +1,819 @@
+{
+  "canvasSize": {"width": 1600, "height": 900}, 
+  "components": [
+    {
+      "id": "PROGRAM_COUNTER", 
+      "asset": "program_counter",
+      "label": "PROGRAM\nCOUNTER",
+      "x": 100, "y": 530, "width": 50, "height": 100,
+      "connectionPoints": {
+          "in": {"x": 100, "y": 580, "name": ""}, 
+          "out_1": {"x": 150, "y": 580, "name": ""},   
+          "out_2": {"x": 150, "y": 580, "name": ""}, 
+          "out_3": {"x": 150, "y": 580, "name": ""} 
+      }
+    },
+    {
+      "id": "INSTRUCTION_MEMORY", 
+      "asset": "instruction_memory",
+      "label": "INSTRUCTION\nMEMORY",
+      "x": 190, "y": 555, "width": 120, "height": 180,
+      "connectionPoints": {
+        "in": {"x": 190, "y": 580, "name": "Read address"}, 
+        "out": {"x": 310, "y": 645, "name": "Instruction\n[31-0]"}
+      }
+    },
+    {
+      "id": "SPLITTER", 
+      "asset": "splitter",
+      "label": "S\nP\nL\nI\nT\nT\nE\nR",
+      "x": 355, "y": 520, "width": 50, "height": 240,
+      "connectionPoints": {
+        "in": {"x": 355, "y": 645, "name": ""}, 
+        "out1": {"x": 380, "y": 520, "name": "Instruction\n[31-21]"},
+        "out2": {"x": 405, "y": 565, "name": "Instruction\n[9-5]"},
+        "out3": {"x": 405, "y": 600, "name": "Instruction\n[20-16]"},
+        "out4_1": {"x": 405, "y": 690, "name": "Instruction\n[4-0]"},
+        "out4_2": {"x": 405, "y": 690, "name": ""},
+        "out5": {"x": 405, "y": 750, "name": "Instruction\n[31-0]"},
+        "out6": {"x": 380, "y": 760, "name": "Instruction\n[31-21]"}
+      }
+    },
+    {
+      "id": "MUX_REGFILESrc", 
+      "asset": "multiplexer",
+      "label": "M\nU\nX",
+      "x": 500, "y": 575, "width": 40, "height": 100,
+      "connectionPoints": {
+        "in0": {"x": 500, "y": 600, "name": "0"}, 
+        "in1": {"x": 500, "y": 655, "name": "1"}, 
+        "out": {"x": 540, "y": 625, "name": ""},
+        "signal": {"x": 520, "y": 675, "name": ""} 
+      }
+    },
+    {
+      "id": "REGISTERS_FILE", 
+      "asset": "registers_file",
+      "label": "REGISTERS",
+      "x": 570, "y": 540, "width": 145, "height": 205,
+      "connectionPoints": {
+        "in1": {"x": 570, "y": 565, "name": "Read\nregester 1"}, 
+        "in2": {"x": 570, "y": 625, "name": "Read\nregester 2"},
+        "in3": {"x": 570, "y": 690, "name": "Write\nregester"},
+        "in4": {"x": 570, "y": 730, "name": "Read\ndata"},
+        "out1": {"x": 715, "y": 600, "name": "Read\ndata 1"},
+        "out2_1": {"x": 715, "y": 670, "name": "Read\ndata 2"},
+        "out2_2": {"x": 715, "y": 670, "name": ""},
+        "signal": {"x": 635, "y": 570, "name": ""}
+      }
+    },
+    {
+      "id": "EXTRACTOR", 
+      "asset": "extractor",
+      "label": "EXTRACTOR",
+      "x": 615, "y": 795, "width": 85, "height": 105,
+      "connectionPoints": {
+        "in": {"x": 615, "y": 845, "name": "32"}, 
+        "out_1": {"x": 700, "y": 845, "name": "64"},
+        "out_2": {"x": 700, "y": 845, "name": ""}
+      }
+    },
+    {
+      "id": "CONTROL_UNIT", 
+      "asset": "control_unit",
+      "label": "CONTROL\nUNIT",
+      "x": 495, "y": 300, "width": 90, "height": 230,
+      "connectionPoints": {
+        "in": {"x": 495, "y": 415, "name": ""}, 
+        "out1": {"x": 560, "y": 315, "name": "Reg2Loc"},
+        "out2": {"x": 570, "y": 335, "name": "UncondBranch"},
+        "out3": {"x": 575, "y": 355, "name": "FlagBranch"},
+        "out4": {"x": 580, "y": 375, "name": "ZeroBranch"},
+        "out5": {"x": 583, "y": 395, "name": "MemRead"},
+        "out6": {"x": 585, "y": 415, "name": "MemToReg"},
+        "out7": {"x": 583, "y": 435, "name": "MemWrite"},
+        "out8": {"x": 580, "y": 455, "name": "FlagWrite"},
+        "out9": {"x": 575, "y": 475, "name": "ALUSrc"},
+        "out10": {"x": 570, "y": 495, "name": "ALUOp"},
+        "out11": {"x": 560, "y": 515, "name": "RegWrite"}
+      }
+    },
+    {
+      "id": "MUX_ALUSrc", 
+      "asset": "multiplexer",
+      "label": "M\nU\nX",
+      "x": 785, "y": 645, "width": 40, "height": 100,
+      "connectionPoints": {
+        "in0": {"x": 785, "y": 670, "name": "0"}, 
+        "in1": {"x": 785, "y": 725, "name": "1"},
+        "out": {"x": 825, "y": 695, "name": ""},
+        "signal": {"x": 805, "y": 645, "name": ""}
+      }
+    },
+    {
+      "id": "ALU", 
+      "asset": "alu",
+      "label": "ALU",
+      "x": 850, "y": 580, "width": 110, "height": 135,
+      "connectionPoints": {
+        "in1": {"x": 850, "y": 600, "name": ""}, 
+        "in2": {"x": 850, "y": 695, "name": ""},
+        "signal": {"x": 910, "y": 700, "name": ""},
+        "out1": {"x": 960, "y": 625, "name": "CBZ/CBNZ"},
+        "out2_1": {"x": 960, "y": 670, "name": ""},
+        "out2_2": {"x": 960, "y": 670, "name": ""},
+        "flag_n": {"x": 860, "y": 610, "name": ""},
+        "flag_z": {"x": 890, "y": 615, "name": ""},
+        "flag_c": {"x": 920, "y": 620, "name": ""},
+        "flag_v": {"x": 950, "y": 625, "name": ""}
+      }
+    },
+    {
+      "id": "ALU_CONTROL", 
+      "asset": "alu_control",
+      "label": "ALU\nCONTROL",
+      "x": 810, "y": 815, "width": 85, "height": 105,
+      "connectionPoints": {
+        "in": {"x": 810, "y": 865, "name": ""}, 
+        "signal": {"x": 850, "y": 915, "name": ""},
+        "out": {"x": 895, "y": 865, "name": ""}
+      }
+    },
+    {
+      "id": "MUX_WB_REGFILE", 
+      "asset": "multiplexer",
+      "label": "M\nU\nX",
+      "x": 1275, "y": 680, "width": 40, "height": 100,
+      "connectionPoints": {
+        "in1": {"x": 1275, "y": 700, "name": "1"}, 
+        "in0": {"x": 1275, "y": 755, "name": "0"},
+        "signal": {"x": 1295, "y": 680, "name": ""},
+        "out": {"x": 1315, "y": 725, "name": ""}
+      }
+    },
+    {
+      "id": "DATA_MEMORY", 
+      "asset": "data_memory",
+      "label": "DATA\nMEMORY",
+      "x": 1105, "y": 630, "width": 130, "height": 190,
+      "connectionPoints": {
+        "in1": {"x": 1105, "y": 670, "name": "Address"}, 
+        "in2": {"x": 1105, "y": 785, "name": "Write\ndata"},
+        "signal1": {"x": 1170, "y": 630, "name": ""},
+        "signal2": {"x": 1170, "y": 820, "name": ""},
+        "out": {"x": 1235, "y": 700, "name": "Read\ndata"}
+      }
+    },
+    {
+      "id": "PC_ADDER4", 
+      "asset": "adder",
+      "label": "ADD",
+      "x": 295, "y": 105, "width": 90, "height": 110,
+      "connectionPoints": {
+        "in1": {"x": 295, "y": 125, "name": ""}, 
+        "in2": {"x": 295, "y": 195, "name": ""},
+        "out": {"x": 385, "y": 160, "name": ""}
+      }
+    },
+    {
+      "id": "SHIFT_LEFT_2", 
+      "asset": "shift",
+      "label": "SHITF\nLEFT 2",
+      "x": 830, "y": 245, "width": 70, "height": 75,
+      "connectionPoints": {
+        "in": {"x": 830, "y": 285, "name": ""}, 
+        "out": {"x": 900, "y": 285, "name": ""}
+      }
+    },
+    {
+      "id": "BR_ADDER", 
+      "asset": "adder",
+      "label": "ADD",
+      "x": 930, "y": 180, "width": 105, "height": 130,
+      "connectionPoints": {
+        "in1": {"x": 930, "y": 200, "name": ""}, 
+        "in2": {"x": 930, "y": 285, "name": ""}, 
+        "out": {"x": 1035, "y": 240, "name": ""}
+      }
+    },
+    {
+      "id": "MUX_PCSrc", 
+      "asset": "multiplexer",
+      "label": "M\nU\nX",
+      "x": 1225, "y": 140, "width": 45, "height": 120,
+      "connectionPoints": {
+        "in0": {"x": 1225, "y": 160, "name": "0"}, 
+        "in1": {"x": 1225, "y": 240, "name": "1"}, 
+        "out": {"x": 1270, "y": 200, "name": ""},
+        "signal": {"x": 1250, "y": 260, "name": ""}
+      }
+    },
+    {
+      "id": "N_FLAG", 
+      "asset": "flag",
+      "label": "N",
+      "x": 844, "y": 525, "width": 33, "height": 30,
+      "connectionPoints": {
+        "in": {"x": 860, "y": 555, "name": ""},
+        "out": {"x": 965, "y": 540, "name": ""},
+        "signal": {"x": 907, "y": 525, "name": ""}
+      }
+    },
+    {
+      "id": "Z_FLAG", 
+      "asset": "flag",
+      "label": "Z",
+      "x": 874, "y": 525, "width": 33, "height": 30,
+      "connectionPoints": {
+        "in": {"x": 890, "y": 555, "name": ""},
+        "out": {"x": 965, "y": 540, "name": ""},
+        "signal": {"x": 907, "y": 525, "name": ""}
+      }
+    },
+    {
+      "id": "C_FLAG", 
+      "asset": "flag",
+      "label": "C",
+      "x": 904, "y": 525, "width": 33, "height": 30,
+      "connectionPoints": {
+        "in": {"x": 920, "y": 555, "name": ""},
+        "out": {"x": 965, "y": 540, "name": ""},
+        "signal": {"x": 907, "y": 525, "name": ""}
+      }
+    },
+    {
+      "id": "V_FLAG", 
+      "asset": "flag",
+      "label": "V",
+      "x": 934, "y": 525, "width": 33, "height": 30,
+      "connectionPoints": {
+        "in": {"x": 950, "y": 555, "name": ""},
+        "out": {"x": 965, "y": 540, "name": ""},
+        "signal": {"x": 907, "y": 525, "name": ""}
+      }
+    },
+    {
+      "id": "BR_FLAG_AND", 
+      "asset": "and_gate",
+      "label": "",
+      "x": 1005, "y": 510, "width": 40, "height": 40,
+      "connectionPoints": {
+        "signal1": {"x": 1005, "y": 520, "name": ""},
+        "signal2": {"x": 1005, "y": 540, "name": ""},
+        "out": {"x": 1045, "y": 530, "name": ""}
+      }
+    },
+    {
+      "id": "BR_ZERO_AND", 
+      "asset": "and_gate",
+      "label": "",
+      "x": 1095, "y": 510, "width": 40, "height": 40,
+      "connectionPoints": {
+        "signal1": {"x": 1095, "y": 520, "name": ""},
+        "signal2": {"x": 1095, "y": 540, "name": ""},
+        "out": {"x": 1135, "y": 530, "name": ""}
+      }
+    },
+    {
+      "id": "BR_OR", 
+      "asset": "and_gate",
+      "label": "",
+      "x": 1175, "y": 325, "width": 40, "height": 40,
+      "connectionPoints": {
+        "signal1": {"x": 1177, "y": 335, "name": ""},
+        "signal2": {"x": 1179, "y": 345, "name": ""},
+        "signal3": {"x": 1177, "y": 355, "name": ""},
+        "out": {"x": 1215, "y": 345, "name": ""}
+      }
+    },
+    {
+      "id": "CONSTANT_4", 
+      "asset": "constant",
+      "label": "4",
+      "x": 220, "y": 180, "width": 30, "height": 30,
+      "connectionPoints": {
+        "out": {"x": 250, "y": 195, "name": ""}
+      }
+    }
+  ],
+  "buses": [
+    {
+      "id": "ProgramCounter_InstructionMemory",
+      "path": [
+        {"component": "PROGRAM_COUNTER", "point": "out_3"},
+        {"x": 170, "y": 580},
+        {"component": "INSTRUCTION_MEMORY", "point": "in"}
+      ],
+      "color": "#000000",
+      "thickness": 3
+    },
+    {
+      "id": "ProgramCounter_PCAdder4", 
+      "path": [
+        {"component": "PROGRAM_COUNTER", "point": "out_1"}, 
+        {"x": 170, "y": 580},                 
+        {"x": 170, "y": 125},                 
+        {"component": "PC_ADDER4", "point": "in1"} 
+      ],
+      "color": "#000000",
+      "thickness": 3
+    },
+    {
+      "id": "ProgramCounter_BranchAdder",
+      "path": [
+        {"component": "PROGRAM_COUNTER", "point": "out_2"},
+        {"x": 170, "y": 580},
+        {"x": 170, "y": 300},
+        {"x": 435, "y": 300},
+        {"x": 435, "y": 200},
+        {"component": "BR_ADDER", "point": "in1"}
+      ],
+      "color": "#000000",
+      "thickness": 3
+    },
+    {
+      "id": "InstructionMemory_Splitter",
+      "path": [
+        {"component": "INSTRUCTION_MEMORY", "point": "out"},
+        {"component": "SPLITTER", "point": "in"}
+      ],
+      "color": "#000000",
+      "thickness": 3
+    },
+    {
+      "id": "Splitter_ControlUnit",
+      "path": [
+        {"component": "SPLITTER", "point": "out1"},
+        {"x": 380, "y": 415},
+        {"component": "CONTROL_UNIT", "point": "in"}
+      ],
+      "color": "#000000",
+      "thickness": 3
+    },
+    {
+      "id": "Splitter_RegFile1",
+      "path": [
+        {"component": "SPLITTER", "point": "out2"},
+        {"component": "REGISTERS_FILE", "point": "in1"}
+      ],
+      "color": "#000000",
+      "thickness": 3
+    },
+    {
+      "id": "Splitter_MuxRegFile_0",
+      "path": [
+        {"component": "SPLITTER", "point": "out3"},
+        {"component": "MUX_REGFILESrc", "point": "in0"}
+      ],
+      "color": "#000000",
+      "thickness": 3
+    },
+    {
+      "id": "Splitter_MuxRegFile_1",
+      "path": [
+        {"component": "SPLITTER", "point": "out4_1"},
+        {"x": 445, "y": 690},
+        {"x": 445, "y": 655},
+        {"component": "MUX_REGFILESrc", "point": "in1"}
+      ],
+      "color": "#000000",
+      "thickness": 3
+    },
+    {
+      "id": "Splitter_RegFile2",
+      "path": [
+        {"component": "SPLITTER", "point": "out4_2"},
+        {"component": "REGISTERS_FILE", "point": "in3"}
+      ],
+      "color": "#000000",
+      "thickness": 3
+    },
+    {
+      "id": "Splitter_Extractor",
+      "path": [
+        {"component": "SPLITTER", "point": "out5"},
+        {"x": 460, "y": 750},
+        {"x": 460, "y": 845},
+        {"component": "EXTRACTOR", "point": "in"}
+      ],
+      "color": "#000000",
+      "thickness": 3
+    },
+    {
+      "id": "Splitter_AluControl",
+      "path": [
+        {"component": "SPLITTER", "point": "out6"},
+        {"x": 380, "y": 930},
+        {"x": 780, "y": 930},
+        {"x": 780, "y": 865},
+        {"component": "ALU_CONTROL", "point": "in"}
+      ],
+      "color": "#000000",
+      "thickness": 3
+    },
+    {
+      "id": "MuxRegFile_RegFile",
+      "path": [
+        {"component": "MUX_REGFILESrc", "point": "out"},
+        {"component": "REGISTERS_FILE", "point": "in2"}
+      ],
+      "color": "#000000",
+      "thickness": 3
+    },
+    {
+      "id": "RegFile_Alu",
+      "path": [
+        {"component": "REGISTERS_FILE", "point": "out1"},
+        {"component": "ALU", "point": "in1"}
+      ],
+      "color": "#000000",
+      "thickness": 3
+    },
+    {
+      "id": "RegFile_MuxAlu_0",
+      "path": [
+        {"component": "REGISTERS_FILE", "point": "out2_1"},
+        {"component": "MUX_ALUSrc", "point": "in0"}
+      ],
+      "color": "#000000",
+      "thickness": 3
+    },
+    {
+      "id": "RegFile_DataMemory",
+      "path": [
+        {"component": "REGISTERS_FILE", "point": "out2_2"},
+        {"x": 730, "y": 670},
+        {"x": 730, "y": 785},
+        {"component": "DATA_MEMORY", "point": "in2"}
+      ],
+      "color": "#000000",
+      "thickness": 3
+    },
+    {
+      "id": "Extractor_MuxAlu_1",
+      "path": [
+        {"component": "EXTRACTOR", "point": "out_1"},
+        {"x": 760, "y": 845},
+        {"x": 760, "y": 725},
+        {"component": "MUX_ALUSrc", "point": "in1"}
+      ],
+      "color": "#000000",
+      "thickness": 3
+    },
+    {
+      "id": "Extractor_ShiftLeft2",
+      "path": [
+        {"component": "EXTRACTOR", "point": "out_2"},
+        {"x": 760, "y": 845},
+        {"x": 760, "y": 285},
+        {"component": "SHIFT_LEFT_2", "point": "in"}
+      ],
+      "color": "#000000",
+      "thickness": 3
+    },
+    {
+      "id": "MuxAlu_Alu",
+      "path": [
+        {"component": "MUX_ALUSrc", "point": "out"},
+        {"component": "ALU", "point": "in2"}
+      ],
+      "color": "#000000",
+      "thickness": 3
+    },
+    {
+      "id": "Alu_DataMemory",
+      "path": [
+        {"component": "ALU", "point": "out2_1"},
+        {"component": "DATA_MEMORY", "point": "in1"}
+      ],
+      "color": "#000000",
+      "thickness": 3
+    },
+    {
+      "id": "Alu_MuxWbRegFile_0",
+      "path": [
+        {"component": "ALU", "point": "out2_2"},
+        {"x": 1075, "y": 670},
+        {"x": 1075, "y": 840},
+        {"x": 1255, "y": 840},
+        {"x": 1255, "y": 755},
+        {"component": "MUX_WB_REGFILE", "point": "in0"}
+      ],
+      "color": "#000000",
+      "thickness": 3
+    },
+    {
+      "id": "Alu_BrZeroAnd",
+      "path": [
+        {"component": "ALU", "point": "out1"},
+        {"x": 1070, "y": 625},
+        {"x": 1070, "y": 540},
+        {"component": "BR_ZERO_AND", "point": "signal2"}
+      ],
+      "color": "#0000FF",
+      "thickness": 3
+    },{
+      "id": "Alu_NFlag",
+      "path": [
+        {"component": "ALU", "point": "flag_n"},
+        {"component": "N_FLAG", "point": "in"}
+      ],
+      "color": "#0000FF",
+      "thickness": 3
+    },
+    {
+      "id": "Alu_ZFlag",
+      "path": [
+        {"component": "ALU", "point": "flag_z"},
+        {"component": "Z_FLAG", "point": "in"}
+      ],
+      "color": "#0000FF",
+      "thickness": 3
+    },
+    {
+      "id": "Alu_CFlag",
+      "path": [
+        {"component": "ALU", "point": "flag_c"},
+        {"component": "C_FLAG", "point": "in"}
+      ],
+      "color": "#0000FF",
+      "thickness": 3
+    },
+    {
+      "id": "Alu_VFlag",
+      "path": [
+        {"component": "ALU", "point": "flag_v"},
+        {"component": "V_FLAG", "point": "in"}
+      ],
+      "color": "#0000FF",
+      "thickness": 3
+    },
+    {
+      "id": "AluControl_Alu_Signal",
+      "path": [
+        {"component": "ALU_CONTROL", "point": "out"},
+        {"x": 910, "y": 865},
+        {"component": "ALU", "point": "signal"}
+      ],
+      "color": "#0000FF",
+      "thickness": 3
+    },
+    {
+      "id": "DataMemory_MuxWbRegFile_1",
+      "path": [
+        {"component": "DATA_MEMORY", "point": "out"},
+        {"component": "MUX_WB_REGFILE", "point": "in1"}
+      ],
+      "color": "#000000",
+      "thickness": 3
+    },
+    {
+      "id": "MuxWbRegFile_RegFile",
+      "path": [
+        {"component": "MUX_WB_REGFILE", "point": "out"},
+        {"x": 1335, "y": 725},
+        {"x": 1335, "y": 970},
+        {"x": 540, "y": 970},
+        {"x": 540, "y": 730},
+        {"component": "REGISTERS_FILE", "point": "in4"}
+      ],
+      "color": "#000000",
+      "thickness": 3
+    },
+    {
+      "id": "ShiftLeft2_BranchAdder",
+      "path": [
+        {"component": "SHIFT_LEFT_2", "point": "out"},
+        {"component": "BR_ADDER", "point": "in2"}
+      ],
+      "color": "#000000",
+      "thickness": 3
+    },
+    {
+      "id": "BranchAdder_MuxPCSrc_1",
+      "path": [
+        {"component": "BR_ADDER", "point": "out"},
+        {"component": "MUX_PCSrc", "point": "in1"}
+      ],
+      "color": "#000000",
+      "thickness": 3
+    },
+    {
+      "id": "PCAdder4_const",
+      "path": [
+        {"component": "CONSTANT_4", "point": "out"},
+        {"component": "PC_ADDER4", "point": "in2"}
+      ],
+      "color": "#000000",
+      "thickness": 3
+    },
+    {
+      "id": "PCAdder4_MuxPCSrc_0",
+      "path": [
+        {"component": "PC_ADDER4", "point": "out"},
+        {"component": "MUX_PCSrc", "point": "in0"}
+      ],
+      "color": "#000000",
+      "thickness": 3
+    },
+    {
+      "id": "MuxPCSrc_ProgramCounter",
+      "path": [
+        {"component": "MUX_PCSrc", "point": "out"},
+        {"x": 1325, "y": 200},
+        {"x": 1325, "y": 90},
+        {"x": 85, "y": 90},
+        {"x": 85, "y": 580},
+        {"component": "PROGRAM_COUNTER", "point": "in"}
+      ],
+      "color": "#000000",
+      "thickness": 3
+    },
+    {
+      "id": "ControlUnit_MuxRegFile_Signal_Reg2Loc",
+      "path": [
+        {"component": "CONTROL_UNIT", "point": "out1"},
+        {"x": 625, "y": 315},
+        {"x": 625, "y": 260},
+        {"x": 320, "y": 260},
+        {"x": 320, "y": 810},
+        {"x": 520, "y": 810},
+        {"component": "MUX_REGFILESrc", "point": "signal"}
+      ],
+      "color": "#0000FF",
+      "thickness": 3
+    },
+    {
+      "id": "ControlUnit_BrOr_Signal_UncondBranch",
+      "path": [
+        {"component": "CONTROL_UNIT", "point": "out2"},
+        {"component": "BR_OR", "point": "signal1"}
+      ],
+      "color": "#0000FF",
+      "thickness": 3
+    },
+    {
+      "id": "ControlUnit_BrFlagAnd_Signal_FlagBranch",
+      "path": [
+        {"component": "CONTROL_UNIT", "point": "out3"},
+        {"x": 990, "y": 355},
+        {"x": 990, "y": 520},
+        {"component": "BR_FLAG_AND", "point": "signal1"}
+      ],
+      "color": "#0000FF",
+      "thickness": 3
+    },
+    {
+      "id": "ControlUnit_BrZeroAnd_Signal_ZeroBranch",
+      "path": [
+        {"component": "CONTROL_UNIT", "point": "out4"},
+        {"x": 1080, "y": 375},
+        {"x": 1080, "y": 520},
+        {"component": "BR_ZERO_AND", "point": "signal1"}
+      ],
+      "color": "#0000FF",
+      "thickness": 3
+    },
+    {
+      "id": "ControlUnit_DataMemory_Signal_MemRead",
+      "path": [
+        {"component": "CONTROL_UNIT", "point": "out5"},
+        {"x": 1170, "y": 395},
+        {"component": "DATA_MEMORY", "point": "signal1"}
+      ],
+      "color": "#0000FF",
+      "thickness": 3
+    },
+    {
+      "id": "ControlUnit_MuxWbRegFile_Signal_MemToReg",
+      "path": [
+        {"component": "CONTROL_UNIT", "point": "out6"},
+        {"x": 1295, "y": 415},
+        {"component": "MUX_WB_REGFILE", "point": "signal"}
+      ],
+      "color": "#0000FF",
+      "thickness": 3
+    },
+    {
+      "id": "ControlUnit_DataMemory_Signal_MemWrite",
+      "path": [
+        {"component": "CONTROL_UNIT", "point": "out7"},
+        {"x": 1355, "y": 435},
+        {"x": 1355, "y": 865},
+        {"x": 1170, "y": 865},
+        {"component": "DATA_MEMORY", "point": "signal2"}
+      ],
+      "color": "#0000FF",
+      "thickness": 3
+    },
+    {
+      "id": "ControlUnit_Flags_Signal_FlagWrite",
+      "path": [
+        {"component": "CONTROL_UNIT", "point": "out8"},
+        {"x": 910, "y": 455},
+        {"x": 910, "y": 525}
+      ],
+      "color": "#0000FF",
+      "thickness": 3
+    },
+    {
+      "id": "ControlUnit_MuxAlu_Signal_AluSrc",
+      "path": [
+        {"component": "CONTROL_UNIT", "point": "out9"},
+        {"x": 805, "y": 475},
+        {"component": "MUX_ALUSrc", "point": "signal"}
+      ],
+      "color": "#0000FF",
+      "thickness": 3
+    },{
+      "id": "ControlUnit_AluControl_Signal_AluOp",
+      "path": [
+        {"component": "CONTROL_UNIT", "point": "out10"},
+        {"x": 745, "y": 495},
+        {"x": 745, "y": 955},
+        {"x": 850, "y": 955},
+        {"component": "ALU_CONTROL", "point": "signal"}
+      ],
+      "color": "#0000FF",
+      "thickness": 3
+    },
+    {
+      "id": "ControlUnit_RegFile_Signal_RegWrite",
+      "path": [
+        {"component": "CONTROL_UNIT", "point": "out11"},
+        {"x": 635, "y": 515},
+        {"component": "REGISTERS_FILE", "point": "signal"}
+      ],
+      "color": "#0000FF",
+      "thickness": 3
+    },
+    {
+      "id": "BrFlagAnd_BrOr",
+      "path": [
+        {"component": "BR_FLAG_AND", "point": "out"},
+        {"x": 1060, "y": 530},
+        {"x": 1060, "y": 345},
+        {"component": "BR_OR", "point": "signal2"}
+      ],
+      "color": "#0000FF",
+      "thickness": 3
+    },
+    {
+      "id": "BrZeroAnd_BrOr",
+      "path": [
+        {"component": "BR_ZERO_AND", "point": "out"},
+        {"x": 1155, "y": 530},
+        {"x": 1155, "y": 355},
+        {"component": "BR_OR", "point": "signal3"}
+      ],
+      "color": "#0000FF",
+      "thickness": 3
+    },
+    {
+      "id": "BrOr_MuxPCSrc_Signal",
+      "path": [
+        {"component": "BR_OR", "point": "out"},
+        {"x": 1250, "y": 345},
+        {"component": "MUX_PCSrc", "point": "signal"}
+      ],
+      "color": "#0000FF",
+      "thickness": 3
+    },
+    {
+      "id": "NFlag_BrFlagAnd",
+      "path": [
+        {"component": "N_FLAG", "point": "out"},
+        {"component": "BR_FLAG_AND", "point": "signal2"}
+      ],
+      "color": "#0000FF",
+      "thickness": 3
+    },
+    {
+      "id": "ZFlag_BrFlagAnd",
+      "path": [
+        {"component": "Z_FLAG", "point": "out"},
+        {"component": "BR_FLAG_AND", "point": "signal2"}
+      ],
+      "color": "#0000FF",
+      "thickness": 3
+    },
+    {
+      "id": "CFlag_BrFlagAnd",
+      "path": [
+        {"component": "C_FLAG", "point": "out"},
+        {"component": "BR_FLAG_AND", "point": "signal2"}
+      ],
+      "color": "#0000FF",
+      "thickness": 3
+    },
+    {
+      "id": "VFlag_BrFlagAnd",
+      "path": [
+        {"component": "V_FLAG", "point": "out"},
+        {"component": "BR_FLAG_AND", "point": "signal2"}
+      ],
+      "color": "#0000FF",
+      "thickness": 3
+    }    
+  ]
+}
