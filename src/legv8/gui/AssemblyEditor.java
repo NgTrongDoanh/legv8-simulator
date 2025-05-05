@@ -1,8 +1,11 @@
+/**
+ * @author TrDoanh, Giahuy
+ * @version 1.0 --- There may be bugs :) Be careful! 
+ */
+
 package legv8.gui;
 
 import legv8.assembler.Assembler; 
-import legv8.core.InstructionMemory; 
-import legv8.instructions.InstructionConfigLoader;
 import legv8.util.ColoredLog;
 import legv8.instructions.Instruction; 
 
@@ -13,10 +16,14 @@ import java.awt.event.*;
 import java.io.*;
 import java.util.Arrays;
 import java.util.List;
-import java.util.BitSet; 
 
+/**
+ * AssemblyEditor is a GUI component for editing LEGv8 assembly code.
+ * It provides features to create, open, save, and assemble assembly files.
+ */
 public class AssemblyEditor extends JFrame implements ActionListener {
 
+    // GUI components
     private JTextArea textArea;
     private JScrollPane scrollPane;
     private JButton btnAssemble;    
@@ -25,15 +32,21 @@ public class AssemblyEditor extends JFrame implements ActionListener {
     private File currentFile;
     private JMenuItem miNew, miOpen, miSave, miSaveAs, miExitEditor;
 
-    private String content = "";
+    // Assembly-related variables
     private boolean hasUnsavedChanges = false;
     
     private List<Instruction> instructions = null; 
     private Assembler assembler = new Assembler(); 
-    private InstructionConfigLoader configLoader = new InstructionConfigLoader(); 
 
-    private Font textFont = new Font("Monospaced", Font.PLAIN, 14);
+    private Font textFont = new Font("Monospaced", Font.PLAIN, 14); // Font for the text area
 
+    
+    // --- Constructor ---
+
+    /**
+     * Constructor for AssemblyEditor.
+     * Initializes the GUI components and sets up the layout.
+     */
     public AssemblyEditor() {
         setTitle("LEGv8 Assembly Editor");
         setSize(700, 500);
@@ -44,24 +57,23 @@ public class AssemblyEditor extends JFrame implements ActionListener {
         layoutComponents();
         updateTitle();
 
-        
         textArea.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
            @Override public void insertUpdate(javax.swing.event.DocumentEvent e) { markChanged(); }
            @Override public void removeUpdate(javax.swing.event.DocumentEvent e) { markChanged(); }
            @Override public void changedUpdate(javax.swing.event.DocumentEvent e) { /* Style change, Implementing later */ }
         });
-
         
         addWindowListener(new WindowAdapter() {
             @Override public void windowClosing(WindowEvent e) { handleClose(); }
         });
     }
 
-    public AssemblyEditor(InstructionConfigLoader configLoader) {
-        this();
-        this.configLoader = configLoader; 
-    }
-
+    
+    // --- GUI Initialization and Layout ---
+    /**
+     * Helper method to initialize GUI components.
+     * Sets up the text area, buttons, file chooser, and menu bar.
+     */
     private void initComponents() {
         textArea = new JTextArea();
         textArea.setFont(textFont);
@@ -84,10 +96,14 @@ public class AssemblyEditor extends JFrame implements ActionListener {
         fileChooser.setFileFilter(filter);
 
         currentFile = null;
-        content = "";
         hasUnsavedChanges = false;
     }
 
+    /**
+     * Helper method to create the menu bar.
+     * Sets up the file menu with options for new, open, save, and exit.
+     * @return JMenuBar The created menu bar.
+     */
     private JMenuBar createMenuBar() {
         JMenuBar mb = new JMenuBar();
         JMenu fm = new JMenu("File");
@@ -120,6 +136,10 @@ public class AssemblyEditor extends JFrame implements ActionListener {
         return mb;
     }
 
+    /**
+     * Helper method to layout the components in the frame.
+     * Sets the layout manager and adds components to the frame.
+     */
     private void layoutComponents() {
         setLayout(new BorderLayout(5, 5));
         add(scrollPane, BorderLayout.CENTER);
@@ -131,6 +151,13 @@ public class AssemblyEditor extends JFrame implements ActionListener {
         setJMenuBar(createMenuBar());
     }
 
+
+    // --- Event Handling ---
+
+    /**
+     * Handles button and menu item actions.
+     * @param e The ActionEvent triggered by the user.
+     */
     @Override
     public void actionPerformed(ActionEvent e) {
         Object src = e.getSource();
@@ -149,12 +176,18 @@ public class AssemblyEditor extends JFrame implements ActionListener {
         }
     }
 
+    // --- Assembly and File Operations ---
+
+    /**
+     * Assembles the current code in the text area.
+     * It checks for unsaved changes and prompts the user to save if necessary.
+     * If assembly is successful, it displays the generated instructions.
+     */
     private void assembleCurrentCode() {
         System.out.println(ColoredLog.PENDING + "Assembly Editor: Assemble requested.");
         String code = textArea.getText();
         List<String> codeLines = Arrays.asList(code.split("\\r?\\n")); 
 
-        
         boolean proceed = true;
         if (hasUnsavedChanges) {
             int choice = JOptionPane.showConfirmDialog(this,
@@ -163,47 +196,49 @@ public class AssemblyEditor extends JFrame implements ActionListener {
                 JOptionPane.YES_NO_CANCEL_OPTION,
                 JOptionPane.WARNING_MESSAGE);
 
-            if (choice == JOptionPane.YES_OPTION) {
-                proceed = saveFile(); 
-            } else if (choice == JOptionPane.CANCEL_OPTION) {
-                proceed = false; 
-            }
-            
+            if (choice == JOptionPane.YES_OPTION) proceed = saveFile(); 
+            else if (choice == JOptionPane.CANCEL_OPTION) proceed = false; 
         }
 
         if (proceed) {
             instructions = assembler.assemble(codeLines);
-            if (instructions != null) {
-                
+            if (instructions != null) {         
                 JOptionPane.showMessageDialog(this, "Assembly successful! " + instructions.size() + " instructions generated.", "Assembly Success", JOptionPane.INFORMATION_MESSAGE);
-                for (Instruction instruction : instructions) {
-                    System.out.println(instruction); 
-                }
+                for (Instruction instruction : instructions) System.out.println(instruction);
             } else {
-                
                 JOptionPane.showMessageDialog(this, "Assembly failed. Check the code for errors.", "Assembly Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
 
+    /**
+     * Handles the close action for the editor.
+     * It prompts the user to save changes if there are unsaved changes.
+     */
     private void handleClose() {
         if (promptToSave()) {
             setVisible(false); 
         }
     }
-
-    
-
+   
+    /**
+     * Creates a new file in the editor.
+     * It prompts the user to save changes if there are unsaved changes.
+     */
     private void newFile() {
         if (promptToSave()) {
             textArea.setText("");
             currentFile = null;
-            content = "";
             markChangesSaved(); 
             textArea.setCaretPosition(0); 
         }
     }
 
+    /**
+     * Opens a file in the editor.
+     * It prompts the user to save changes if there are unsaved
+     * changes before opening a new file.
+     */
     private void openFile() {
         if (promptToSave()) {
             int returnVal = fileChooser.showOpenDialog(this);
@@ -213,11 +248,14 @@ public class AssemblyEditor extends JFrame implements ActionListener {
         }
     }
 
+    /**
+     * Reads the content of a file and displays it in the text area.
+     * @param file The file to be read.
+     */
     private void readFile(File file) {
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             textArea.read(reader, null); 
             currentFile = file;
-            content = textArea.getText();
             markChangesSaved();
             textArea.setCaretPosition(0); 
             System.out.println(ColoredLog.SUCCESS + "Opened file: " + file.getAbsolutePath());
@@ -226,6 +264,11 @@ public class AssemblyEditor extends JFrame implements ActionListener {
         }
     }
 
+    /**
+     * Saves the current file.
+     * If there is no current file, it prompts the user to save as a new file.
+     * @return true if the file is saved successfully, false otherwise.
+     */
     private boolean saveFile() {
         if (currentFile == null) {
             return saveFileAs(); 
@@ -234,6 +277,11 @@ public class AssemblyEditor extends JFrame implements ActionListener {
         }
     }
 
+    /**
+     * Prompts the user to save the current file as a new file.
+     * It shows a file chooser dialog and saves the file with the selected name.
+     * @return true if the file is saved successfully, false otherwise.
+     */
     private boolean saveFileAs() {
         if (currentFile != null) {
             fileChooser.setSelectedFile(currentFile); 
@@ -242,42 +290,40 @@ public class AssemblyEditor extends JFrame implements ActionListener {
         }
 
         int returnVal = fileChooser.showSaveDialog(this);
-        if (returnVal != JFileChooser.APPROVE_OPTION) {
-            return false; 
-        }
+        if (returnVal != JFileChooser.APPROVE_OPTION) return false; 
 
-        File fileToSave = fileChooser.getSelectedFile();
         
+        File fileToSave = fileChooser.getSelectedFile();
         String path = fileToSave.getAbsolutePath();
         if (!path.toLowerCase().matches(".*\\.(s|asm|txt)$")) {
-             fileToSave = new File(path + ".s"); 
+            fileToSave = new File(path + ".s"); 
         }
 
-        
         if (fileToSave.exists()) {
             int confirm = JOptionPane.showConfirmDialog(this,
                 "The file '" + fileToSave.getName() + "' already exists.\nDo you want to overwrite it?",
                 "Confirm Overwrite",
-                JOptionPane.YES_NO_OPTION);
-            if (confirm != JOptionPane.YES_OPTION) {
-                return false; 
-            }
+                JOptionPane.YES_NO_OPTION
+            );
+            if (confirm != JOptionPane.YES_OPTION) return false; 
         }
 
-        
         if (performSave(fileToSave)) {
             currentFile = fileToSave; 
             markChangesSaved(); 
             return true;
-        } else {
-            return false; 
-        }
+        } else return false;
     }
 
+    /**
+     * Performs the actual file save operation.
+     * It writes the content of the text area to the specified file.
+     * @param file The file to save the content to.
+     * @return true if the file is saved successfully, false otherwise.
+     */
     private boolean performSave(File file) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             textArea.write(writer); 
-            content = textArea.getText(); 
             System.out.println(ColoredLog.SUCCESS + "Saved file: " + file.getAbsolutePath());
             return true;
         } catch (IOException e) {
@@ -286,6 +332,10 @@ public class AssemblyEditor extends JFrame implements ActionListener {
         }
     }
 
+    /**
+     * Prompts the user to save changes if there are unsaved changes.
+     * @return true if the user chooses to save or there are no unsaved changes, false otherwise.
+     */
     private boolean promptToSave() {
         if (!hasUnsavedChanges) {
             return true; 
@@ -294,7 +344,8 @@ public class AssemblyEditor extends JFrame implements ActionListener {
             "Do you want to save the changes?",
             "Unsaved Changes",
             JOptionPane.YES_NO_CANCEL_OPTION,
-            JOptionPane.WARNING_MESSAGE);
+            JOptionPane.WARNING_MESSAGE
+        );
 
         if (choice == JOptionPane.YES_OPTION) {
             return saveFile(); 
@@ -305,8 +356,13 @@ public class AssemblyEditor extends JFrame implements ActionListener {
         }
     }
 
-    
 
+    // --- Helper Methods ---
+    
+    /**
+     * Marks the editor as having unsaved changes.
+     * Updates the title of the window to indicate unsaved changes.
+     */
     private void markChanged() {
         if (!hasUnsavedChanges) {
             hasUnsavedChanges = true;
@@ -314,6 +370,10 @@ public class AssemblyEditor extends JFrame implements ActionListener {
         }
     }
 
+    /**
+     * Marks the editor as having saved changes.
+     * Updates the title of the window to indicate saved changes.
+     */
     private void markChangesSaved() {
         if (hasUnsavedChanges) {
             hasUnsavedChanges = false;
@@ -323,24 +383,32 @@ public class AssemblyEditor extends JFrame implements ActionListener {
         updateTitle();
     }
 
+    /**
+     * Updates the title of the editor window.
+     * It includes the file name and indicates if there are unsaved changes.
+     */
     private void updateTitle() {
         String title = "LEGv8 Assembly Editor";
-        if (currentFile != null) {
-            title += " - " + currentFile.getName();
-        } else {
-            title += " - New File";
-        }
-        if (hasUnsavedChanges) {
-            title += "*"; 
-        }
+
+        if (currentFile != null) title += " - " + currentFile.getName();
+        else title += " - New File";
+
+        if (hasUnsavedChanges) title += "*"; 
         setTitle(title);
     }
 
-    
+    /**
+     * Returns the source code from the text area.
+     * @return The source code as a string.
+     */
     public String getSourceCode() {
         return textArea.getText();
     }
 
+    /**
+     * Returns the current file being edited.
+     * @return The current file.
+     */
     public List<Instruction> getAssembledInstructions() {
         return instructions;
     }

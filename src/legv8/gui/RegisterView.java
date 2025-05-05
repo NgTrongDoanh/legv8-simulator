@@ -1,27 +1,41 @@
+/**
+ * @author TrDoanh, Giahuy
+ * @version 1.0 --- There may be bugs :) Be careful! 
+ */
+
 package legv8.gui;
 
 import legv8.storage.RegisterStorage;
-import javax.swing.*;
-import java.awt.*; 
 
+/**
+ * RegisterView is a GUI component that displays the register values of a LEGv8 processor.
+ * It shows the register number, name, hexadecimal value, and decimal value.
+ * The view can highlight the last changed register.
+ */
 public class RegisterView extends StateDisplayFrame {
 
-    private RegisterStorage registerStorageRef; 
-
+    // --- Constructor ---
+    /**
+     * Constructor for RegisterView.
+     * @param parent The parent SimulationView.
+     * @param storage The RegisterStorage to display.
+     */
     public RegisterView(SimulationView parent, RegisterStorage storage) {
         super("Registers (LEGv8)", parent); 
-        this.registerStorageRef = storage;
 
         setColumnNames(new String[]{"Reg #", "Name", "Hex Value (64-bit)", "Decimal Value"});
         setColumnWidths(new int[]{60, 60, 180, 180}); 
-
-        
-        
     }
 
+    
+    // --- GUI Methods ---
+    /**
+     * Updates the register view with the current register values.
+     * @param storage The RegisterStorage containing the register values.
+     * @param lastChangedIndex The index of the last changed register to highlight.
+     */
     public void updateData(RegisterStorage storage, int lastChangedIndex) {
         if (storage == null) return; 
-        this.registerStorageRef = storage; 
 
         int numRegs = RegisterStorage.NUM_REGISTERS;
         Object[][] tableData = new Object[numRegs][4]; 
@@ -31,7 +45,6 @@ public class RegisterView extends StateDisplayFrame {
             String regName = (i == RegisterStorage.ZERO_REGISTER_INDEX) ? "XZR" : ("X" + i);
             
             if (i == 28) regName = "SP";
-            
             if (i == 29) regName = "FP"; 
             if (i == 30) regName = "LR"; 
 
@@ -43,6 +56,5 @@ public class RegisterView extends StateDisplayFrame {
 
         tableModel.setData(tableData); 
         cellRenderer.setHighlightRow(lastChangedIndex); 
-        
     }
 }

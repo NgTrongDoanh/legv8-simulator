@@ -1,10 +1,25 @@
+/**
+ * @author TrDoanh, Giahuy
+ * @version 1.0 --- There may be bugs :) Be careful! 
+ */
+
 package legv8.core;
 
 import legv8.util.ALUResult;
 import legv8.util.ColoredLog;
 
+/**
+ * Simulates the Arithmetic Logic Unit (ALU) of the LEGv8 CPU.
+ * Performs various 64-bit arithmetic (ADD, SUB, MUL, DIV) and logical
+ * (AND, ORR, EOR) operations, as well as shift operations (LSL, LSR, ASR).
+ * It takes two 64-bit inputs (A and B) and an operation code, and produces
+ * a 64-bit result along with the status flags (N, Z, C, V).
+ */
 public class ArithmeticLogicUnit {
-    
+
+    // --- ALU Operation Codes ---
+    // These codes define the specific operation the ALU should perform.
+    // They should match the 'operation' field values defined in the instruction config.
     public static final int ADD    = 0b0010;  
     public static final int SUB    = 0b0110;  
     public static final int AND    = 0b0000;  
@@ -22,10 +37,35 @@ public class ArithmeticLogicUnit {
 
     public static final int IDLE   = 404;  
 
+
+    // --- Constructor ---
+
+    /**
+     * Constructs a new ArithmeticLogicUnit instance.
+     * (No internal state needs initialization).
+     */
+    public ArithmeticLogicUnit() {
+        // Optional log: System.out.println(ColoredLog.SUCCESS + "Arithmetic Logic Unit initialized.");
+    }
+
+    
+    // --- Public Execution Method ---
+
+    /**
+     * Executes the specified ALU operation on the given 64-bit inputs.
+     * Calculates the 64-bit result and the state of the N, Z, C, and V flags.
+     * For shift operations, the lower 6 bits of {@code inputB} are used as the shift amount.
+     *
+     * @param inputA The first 64-bit operand (e.g., from Register File Read Data 1).
+     * @param inputB The second 64-bit operand (e.g., from Register File Read Data 2 or sign-extended immediate).
+     *               For shifts, the lower 6 bits represent the shift amount.
+     * @param operation The integer code specifying the ALU operation to perform (e.g., {@code ALU.ADD}).
+     * @return An {@link ALUResult} object containing the 64-bit result and the boolean values of the N, Z, C, V flags.
+     */
     public ALUResult execute(long inputA, long inputB, int operation) {
         long result = 0L;
         boolean nFlag = false, zFlag = false, cFlag = false, vFlag = false;
-        int shiftAmount = (int)(inputB & 0x3F); 
+        int shiftAmount = (int)(inputB & 0x3F); // Extract the lower 6 bits for shift operations
 
         switch (operation) {
             case ADD:

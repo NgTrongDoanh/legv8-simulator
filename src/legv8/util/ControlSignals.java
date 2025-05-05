@@ -1,5 +1,14 @@
+/**
+ * @author TrDoanh, Giahuy
+ * @version 1.0 --- There may be bugs :) Be careful! 
+ */
+
 package legv8.util;
 
+/**
+ * ControlSignals is a record that represents the control signals used in the LEGv8 architecture.
+ * It contains various boolean flags and integer values that control the behavior of the processor.
+ */
 public record ControlSignals(
     boolean reg2Loc, 
     boolean uncondBranch, boolean flagBranch, boolean zeroBranch, 

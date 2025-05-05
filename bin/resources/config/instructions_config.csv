@@ -1,0 +1,116 @@
+# LEGv8 Instruction Configuration
+# Columns: Mnemonic,Format,OpcodeID(Bin),RegW,ALUSrc,MemW,MemR,MemToReg,ZeroB,FlagB,UncondB,Reg2Loc,FlagW,ALUOperation(Enum),ALUControlOutput(Bin)
+#---------------------------------------------------------------------------------------------------------------------------
+# --- R-Format (OpcodeID = bits 31-21) ---
+ADD,R,10001011000,1,0,0,0,0,0,0,0,0,0,0000,0010       
+# Addition
+ADDS,R,10101011000,1,0,0,0,0,0,0,0,0,1,0000,0010      
+# Addition, set flags
+SUB,R,11001011000,1,0,0,0,0,0,0,0,0,0,0001,0110       
+# Subtraction
+SUBS,R,11101011000,1,0,0,0,0,0,0,0,0,1,0001,0110      
+# Subtraction, set flags
+AND,R,10001010000,1,0,0,0,0,0,0,0,0,0,0010,0000       
+# Logical AND
+ANDS,R,11101010000,1,0,0,0,0,0,0,0,0,1,0010,0000      
+# Logical AND, set flags
+ORR,R,10101010000,1,0,0,0,0,0,0,0,0,0,0011,0001       
+# Logical OR
+EOR,R,11001010000,1,0,0,0,0,0,0,0,0,0,0100,0011       
+# Logical XOR
+LSL,R,11010011011,1,0,0,0,0,0,0,0,0,0,0101,1000       
+# Logical Shift Left
+LSR,R,11010011010,1,0,0,0,0,0,0,0,0,0,0110,1001       
+# Logical Shift Right
+ASR,R,11010011001,1,0,0,0,0,0,0,0,0,0,0111,1010       
+# Arithmetic Shift Right
+MUL,R,10011011000,1,0,0,0,0,0,0,0,0,0,1000,1100       
+# Multiplication
+SMULH,R,10011011010,1,0,0,0,0,0,0,0,0,0,1001,1101     
+# Signed Multiply High
+UMULH,R,10011011110,1,0,0,0,0,0,0,0,0,0,1010,1110     
+# Unsigned Multiply High
+SDIV,R,10011010110,1,0,0,0,0,0,0,0,0,0,1011,1111      
+# Signed Division
+UDIV,R,10011010111,1,0,0,0,0,0,0,0,0,0,1100,1011      
+# Unsigned Division
+# BR,R,11010110000,0,0,0,0,0,0,0,1,0,0,N/A,N/A        
+# Branch Register (no ALU, commented out)
+# --- I-Format (OpcodeID = bits 31-22) ---
+ADDI,I,1001000100,1,1,0,0,0,0,0,0,0,0,0000,0010       
+# Addition with immediate
+ADDIS,I,1011000100,1,1,0,0,0,0,0,0,0,1,0000,0010      
+# Addition with immediate, set flags
+SUBI,I,1101000100,1,1,0,0,0,0,0,0,0,0,0001,0110       
+# Subtraction with immediate
+SUBIS,I,1111000100,1,1,0,0,0,0,0,0,0,1,0001,0110      
+# Subtraction with immediate, set flags
+ANDI,I,1001001000,1,1,0,0,0,0,0,0,0,0,0010,0000       
+# Logical AND with immediate
+ANDIS,I,1111001000,1,1,0,0,0,0,0,0,0,1,0010,0000      
+# Logical AND with immediate, set flags
+ORI,I,1011001000,1,1,0,0,0,0,0,0,0,0,0011,0001        
+# Logical OR with immediate
+EORI,I,1101001000,1,1,0,0,0,0,0,0,0,0,0100,0011       
+# Logical XOR with immediate
+# --- D-Format (OpcodeID = bits 31-21, same range as R) ---
+LDUR,D,11111000010,1,1,0,1,1,0,0,0,0,0,0000,0010      
+# Load, Addition for address
+STUR,D,11111000000,0,1,1,0,0,0,0,0,0,0,0000,0010      
+# Store, Addition for address
+LDURB,D,00111001010,1,1,0,1,1,0,0,0,0,0,0000,0010     
+# Load Byte, Addition for address
+STURB,D,00111001000,0,1,1,0,0,0,0,0,0,0,0000,0010     
+# Store Byte, Addition for address
+LDURH,D,01111001010,1,1,0,1,1,0,0,0,0,0,0000,0010     
+# Load Halfword, Addition for address
+STURH,D,01111001000,0,1,1,0,0,0,0,0,0,0,0000,0010     
+# Store Halfword, Addition for address
+LDURSW,D,10111001010,1,1,0,1,1,0,0,0,0,0,0000,0010    
+# Load Signed Word, Addition for address
+STURW,D,10111001000,0,1,1,0,0,0,0,0,0,0,0000,0010     
+# Store Word, Addition for address
+# --- B-Format (OpcodeID = bits 31-26) ---
+B,B,000101,0,0,0,0,0,0,0,1,0,0,N/A,N/A               
+# Branch, no ALU
+BL,B,100101,1,0,0,0,0,0,0,1,0,0,N/A,N/A              
+# Branch and Link, no ALU
+# --- CB-Format (OpcodeID = bits 31-24) ---
+CBZ,C,10110100,0,0,0,0,0,1,0,0,0,0,0001,0111         
+# Compare and Branch if Zero, Subtraction
+CBNZ,C,10110101,0,0,0,0,0,1,0,0,0,0,0001,0111        
+# Compare and Branch if Not Zero, Subtraction
+# --- B.cond (Shares OpcodeID with CB-Format, but different control) ---
+B.EQ,C,01010100,0,0,0,0,0,0,1,0,0,0,N/A,N/A         
+# Branch if Equal, no ALU
+B.NE,C,01010100,0,0,0,0,0,0,1,0,0,0,N/A,N/A         
+# Branch if Not Equal, no ALU
+B.CS,C,01010100,0,0,0,0,0,0,1,0,0,0,N/A,N/A         
+# Branch if Carry Set, no ALU
+B.CC,C,01010100,0,0,0,0,0,0,1,0,0,0,N/A,N/A         
+# Branch if Carry Clear, no ALU
+B.MI,C,01010100,0,0,0,0,0,0,1,0,0,0,N/A,N/A         
+# Branch if Minus, no ALU
+B.PL,C,01010100,0,0,0,0,0,0,1,0,0,0,N/A,N/A         
+# Branch if Plus, no ALU
+B.VS,C,01010100,0,0,0,0,0,0,1,0,0,0,N/A,N/A         
+# Branch if Overflow Set, no ALU
+B.VC,C,01010100,0,0,0,0,0,0,1,0,0,0,N/A,N/A         
+# Branch if Overflow Clear, no ALU
+B.HI,C,01010100,0,0,0,0,0,0,1,0,0,0,N/A,N/A         
+# Branch if Higher, no ALU
+B.LS,C,01010100,0,0,0,0,0,0,1,0,0,0,N/A,N/A         
+# Branch if Lower or Same, no ALU
+B.GE,C,01010100,0,0,0,0,0,0,1,0,0,0,N/A,N/A         
+# Branch if Greater or Equal, no ALU
+B.LT,C,01010100,0,0,0,0,0,0,1,0,0,0,N/A,N/A         
+# Branch if Less Than, no ALU
+B.GT,C,01010100,0,0,0,0,0,0,1,0,0,0,N/A,N/A         
+# Branch if Greater Than, no ALU
+B.LE,C,01010100,0,0,0,0,0,0,1,0,0,0,N/A,N/A         
+# Branch if Less or Equal, no ALU
+# --- IM-Format (OpcodeID = bits 31-23) ---
+MOVZ,IM,110100101,1,1,0,0,0,0,0,0,0,0,N/A,N/A        
+# Move Wide with Zero, no ALU
+MOVK,IM,111100101,1,1,0,0,0,0,0,0,0,0,N/A,N/A        
+# Move Wide with Keep, no ALU

@@ -1,7 +1,8 @@
 /**
- * @author TrDoanh
- * @version 1.0 --- Maybe exist bugs :)
+ * @author TrDoanh, Giahuy
+ * @version 1.0 --- There may be bugs :) Be careful! 
  */
+
 package legv8.assembler;
 
 import legv8.core.ProgramCounter;
@@ -10,7 +11,10 @@ import legv8.instructions.Instruction;
 import legv8.instructions.InstructionFactory;
 import legv8.util.ColoredLog;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A two-pass assembler for a subset of LEGv8 assembly language.

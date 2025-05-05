@@ -1,16 +1,30 @@
+/**
+ * @author TrDoanh, Giahuy
+ * @version 1.0 --- There may be bugs :) Be careful! 
+ */
+
 package legv8.util;
 
-import legv8.instructions.InstructionConfigLoader;
-import java.util.Objects;
-
-
+/**
+ * FlagBranchControl is a utility class that provides methods to evaluate branch conditions based on CPU flags.
+ * It contains a method to determine the result of a branch instruction based on the current state of the flags.
+ */
 public final class FlagBranchControl {
-    
+    // Helper class to encapsulate the result and message of the branch condition evaluation 
     public record FlagControl (
         boolean result,
         String message
     ) {}
 
+    /**
+     * Evaluates the branch condition based on the CPU flags and the condition code.
+     * @param nFlag The negative flag (N).
+     * @param zFlag The zero flag (Z).
+     * @param cFlag The carry flag (C).
+     * @param vFlag The overflow flag (V).
+     * @param condCode The condition code to evaluate.
+     * @return A FlagControl object containing the result and a message.
+     */
     public static FlagControl getBranchCond(boolean nFlag, boolean zFlag, boolean cFlag, boolean vFlag, int condCode) {
         condCode &= 0xF; 
         switch (condCode) {
