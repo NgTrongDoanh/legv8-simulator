@@ -28,4 +28,4 @@ replay_pid*
 *.dll
 *.so
 *.dylib
-./bin/*
+/bin/*

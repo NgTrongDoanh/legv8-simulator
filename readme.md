@@ -28,10 +28,14 @@ A visual LEGv8 CPU simulator implemented in Java, designed for educational purpo
 *   **Cross-Platform:** Built with Java Swing for the GUI. Build and run scripts provided for Linux/macOS and Windows (unified in a `Makefile`).
 
 ## Screenshots
-**Datapath View During Simulation:**
 
+**Main menu**
 ![Main Memu](resources/Demo/MainMenu.png)
+
+**Assembly Editor:**
 ![Assembly Editor](resources/Demo/AsmEditor.png)
+
+**Datapath View During Simulation:**
 ![Datapath Layout](resources/Demo/SimulationView.png)
 
 
