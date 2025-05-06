@@ -320,8 +320,8 @@ public class SimulatorEngine {
                                         memoryController.getStorage(), registerController.getStorage(), programCounter.getCurrentAddress()));
 
             // Micro-step 6:
-            alu_in_a = registerController.readRegister((int)regfile_readReg1);
-            dataMem_writeData = muxAlu_0 = registerController.readRegister((int)regfile_readReg2);
+            alu_in_a = registerController.readRegister(regfile_readReg1);
+            dataMem_writeData = muxAlu_0 = registerController.readRegister(regfile_readReg2);
 
             StepInfo regfile_alu = new StepInfo("[RegFile_Alu]: REGISTERS_FILE -> ALU", 
                                             ComponentID.REGISTERS_FILE, ComponentID.ALU, BusID.RegFile_Alu, 
@@ -431,7 +431,7 @@ public class SimulatorEngine {
             
             // Micro-step 12:
             regfile_writeData = controlSignals.memToReg() ? muxWbReg_1 : muxWbReg_0;
-            registerController.writeRegister((int)(regfile_writeReg), regfile_writeData, controlSignals.regWrite());
+            registerController.writeRegister(regfile_writeReg, regfile_writeData, controlSignals.regWrite());
 
             StepInfo muxWbReg_regfile = new StepInfo("[MuxWbRegFile_RegFile]: MUX_WB_REGFILE -> REGISTERS_FILE",
                                             ComponentID.MUX_WB_REGFILE, ComponentID.REGISTERS_FILE, BusID.MuxWbRegFile_RegFile, 
@@ -440,7 +440,7 @@ public class SimulatorEngine {
                                         memoryController.getStorage(), registerController.getStorage(), programCounter.getCurrentAddress()));
 
             // Micro-step 13:
-            FlagBranchControl.FlagControl flagControl = FlagBranchControl.getBranchCond(flagN, flagZ, flagC, flagV, (int)regfile_writeReg);
+            FlagBranchControl.FlagControl flagControl = FlagBranchControl.getBranchCond(flagN, flagZ, flagC, flagV, regfile_writeReg);
 
             StepInfo flagN_out = new StepInfo("[Flag_BrFlagAnd]: FLAG -> BR_FLAG_AND", 
                                             ComponentID.N_FLAG, ComponentID.BR_FLAG_AND, BusID.NFlag_BrFlagAnd, 
