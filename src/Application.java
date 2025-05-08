@@ -1,6 +1,6 @@
 /**
- * @author TrDoanh
- * @version 1.0 --- Maybe exist bugs :)
+ * @author TrDoanh, Giahuy
+ * @version 1.0 --- There may be bugs :) Be careful! 
  */
 
 import legv8.instructions.*;
