@@ -28,21 +28,21 @@
       "id": "SPLITTER", 
       "asset": "splitter",
       "label": "S\nP\nL\nI\nT\nT\nE\nR",
-      "x": 355, "y": 520, "width": 50, "height": 240,
+      "x": 370, "y": 520, "width": 25, "height": 240,
       "connectionPoints": {
-        "in": {"x": 355, "y": 645, "name": ""}, 
+        "in": {"x": 370, "y": 645, "name": ""}, 
         "out1": {"x": 380, "y": 520, "name": "Instruction\n[31-21]", "labelXOffset": 5, "labelYOffset": -30},
-        "out2": {"x": 405, "y": 565, "name": "Instruction\n[9-5]", "labelXOffset": 5, "labelYOffset": -14},
-        "out3": {"x": 405, "y": 600, "name": "Instruction\n[20-16]", "labelXOffset": 5, "labelYOffset": -14},
-        "out4_1": {"x": 405, "y": 690, "name": "Instruction [4-0]", "labelXOffset": 5, "labelYOffset": 2},
-        "out4_2": {"x": 405, "y": 690, "name": "", "labelXOffset": 0, "labelYOffset": 0},
-        "out5": {"x": 405, "y": 750, "name": "Instruction [31-0]", "labelXOffset": 5, "labelYOffset": -14},
+        "out2": {"x": 395, "y": 565, "name": "Instruction\n[9-5]", "labelXOffset": 5, "labelYOffset": -14},
+        "out3": {"x": 395, "y": 600, "name": "Instruction\n[20-16]", "labelXOffset": 5, "labelYOffset": -14},
+        "out4_1": {"x": 395, "y": 690, "name": "Instruction [4-0]", "labelXOffset": 5, "labelYOffset": 2},
+        "out4_2": {"x": 395, "y": 690, "name": "", "labelXOffset": 0, "labelYOffset": 0},
+        "out5": {"x": 395, "y": 750, "name": "Instruction [31-0]", "labelXOffset": 5, "labelYOffset": -14},
         "out6": {"x": 380, "y": 760, "name": "Instruction\n[31-21]", "labelXOffset": 5, "labelYOffset": 5}
       }
     },
     {
       "id": "MUX_REGFILESrc", 
-      "asset": "multiplexer",
+      "asset": "multiplexer_regsrc",
       "label": "M\nU\nX",
       "x": 500, "y": 575, "width": 40, "height": 100,
       "connectionPoints": {
@@ -66,7 +66,7 @@
         "out1": {"x": 715, "y": 600, "name": "Read data 1", "labelXOffset": -70, "labelYOffset": -7},
         "out2_1": {"x": 715, "y": 670, "name": "Read data 2", "labelXOffset": -70, "labelYOffset": -7},
         "out2_2": {"x": 715, "y": 670, "name": "", "labelXOffset": 0, "labelYOffset": 0},
-        "signal": {"x": 635, "y": 570, "name": "", "labelXOffset": 0, "labelYOffset": 0}
+        "signal": {"x": 635, "y": 540, "name": "", "labelXOffset": 0, "labelYOffset": 0}
       }
     },
     {
@@ -102,7 +102,7 @@
     },
     {
       "id": "MUX_ALUSrc", 
-      "asset": "multiplexer",
+      "asset": "multiplexer_alusrc",
       "label": "M\nU\nX",
       "x": 785, "y": 645, "width": 40, "height": 100,
       "connectionPoints": {
@@ -121,7 +121,7 @@
       "connectionPoints": {
         "in1": {"x": 850, "y": 600, "name": "", "labelXOffset": 0, "labelYOffset": 0}, 
         "in2": {"x": 850, "y": 695, "name": "", "labelXOffset": 0, "labelYOffset": 0},
-        "signal": {"x": 910, "y": 700, "name": "", "labelXOffset": 0, "labelYOffset": 0},
+        "signal": {"x": 910, "y": 703, "name": "", "labelXOffset": 0, "labelYOffset": 0},
         "out1": {"x": 960, "y": 625, "name": "CBZ/CBNZ", "labelXOffset": -60, "labelYOffset": -7},
         "out2_1": {"x": 960, "y": 670, "name": "", "labelXOffset": 0, "labelYOffset": 0},
         "out2_2": {"x": 960, "y": 670, "name": "", "labelXOffset": 0, "labelYOffset": 0},
@@ -138,13 +138,13 @@
       "x": 810, "y": 815, "width": 85, "height": 105,
       "connectionPoints": {
         "in": {"x": 810, "y": 865, "name": "", "labelXOffset": 0, "labelYOffset": 0}, 
-        "signal": {"x": 850, "y": 915, "name": "", "labelXOffset": 0, "labelYOffset": 0},
+        "signal": {"x": 850, "y": 920, "name": "", "labelXOffset": 0, "labelYOffset": 0},
         "out": {"x": 895, "y": 865, "name": "", "labelXOffset": 0, "labelYOffset": 0}
       }
     },
     {
       "id": "MUX_WB_REGFILE", 
-      "asset": "multiplexer",
+      "asset": "multiplexer_wb",
       "label": "M\nU\nX",
       "x": 1275, "y": 680, "width": 40, "height": 100,
       "connectionPoints": {
@@ -169,7 +169,7 @@
     },
     {
       "id": "PC_ADDER4", 
-      "asset": "adder",
+      "asset": "adder_4",
       "label": "ADD",
       "x": 295, "y": 105, "width": 90, "height": 110,
       "labelRelativeX": 40, 
@@ -191,7 +191,7 @@
     },
     {
       "id": "BR_ADDER", 
-      "asset": "adder",
+      "asset": "adder_br",
       "label": "ADD",
       "x": 930, "y": 180, "width": 105, "height": 130,
       "labelRelativeX": 50, 
@@ -203,7 +203,7 @@
     },
     {
       "id": "MUX_PCSrc", 
-      "asset": "multiplexer",
+      "asset": "multiplexer_pcsrc",
       "label": "M\nU\nX",
       "x": 1225, "y": 140, "width": 45, "height": 120,
       "connectionPoints": {
@@ -281,7 +281,7 @@
     },
     {
       "id": "BR_OR", 
-      "asset": "and_gate",
+      "asset": "or_gate",
       "label": "",
       "x": 1175, "y": 325, "width": 40, "height": 40,
       "connectionPoints": {

@@ -498,7 +498,7 @@ public class SimulatorEngine {
 
             // Micro-step 19:
             StepInfo adder4_const = new StepInfo("[PCAdder4_const]: PC_ADDER4 -> MUX_PCSrc", 
-                                            ComponentID.PC_ADDER4, ComponentID.MUX_PCSrc, BusID.PCAdder4_const, 
+                                            ComponentID.PC_ADDER4, ComponentID.CONSTANT_4, BusID.PCAdder4_const, 
                                             "0x" + Long.toHexString(4));
             microSteps.add(new MicroStep(Set.of(adder4_const),
                                         memoryController.getStorage(), registerController.getStorage(), programCounter.getCurrentAddress()));
