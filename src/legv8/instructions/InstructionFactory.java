@@ -248,11 +248,12 @@ public class InstructionFactory {
         String[] ops = splitOperands(operands);
 
         switch (mnemonic) {
-            case "LSL", "LSR", "ASR": 
+            case "LSL", "LSR": 
                 if (ops.length != 3) throw new AssemblyException(mnemonic + " requires 3 operands: Rd, Rn, #shamt");
                 rd = parseRegister(ops[0]);
                 rn = parseRegister(ops[1]);
                 shamt = parseImmediate(ops[2]);
+                // System.out.printf("%s  Factory Debug: LSL/LSR detected. Rd=%d, Rn=%d, shamt=%d\n", ColoredLog.INFO, rd, rn, shamt);
                 if (shamt < 0 || shamt > 63) throw new AssemblyException("Shift amount (#" + shamt + ") out of range (0-63)");
                 rm = 0; 
                 break;

@@ -815,7 +815,7 @@ public class SimulatorEngine {
             long extendedValue = extractor_execute(instructionBitSet, definition.getFormat(), definition.getMnemonic());
 
             // Step 8: Mux ALU Src
-            long muxAlu_0 = regValues[0]; // Value from readReg_1
+            long muxAlu_0 = regValues[1]; // Value from readReg_1
             long muxAlu_1 = extendedValue; // Value from extractor
             long muxAluSrc_out = muxAluSrc_execute(muxAlu_0, muxAlu_1, controlSignals.aluSrc());
 
@@ -844,6 +844,19 @@ public class SimulatorEngine {
                 }
                 long writeBackValue = muxWriteBack_execute(muxWbReg_0, muxWbReg_1, controlSignals.memToReg());
                 if (controlSignals.regWrite() == '1') {
+                    if (definition.getMnemonic().equals("MOVK")) {
+                        int rd = Instruction.extractBits(instructionBitSet, 0, 4);
+                        long currentValue = registerController.readRegister(rd);
+                        int hw = Instruction.extractBits(instructionBitSet, 21, 22);
+                        int shift = hw * 16;
+
+                        long imm16 = Instruction.extractBits(instructionBitSet, 5, 20) & 0xFFFFL;
+                        long mask = ~(0xFFFFL << shift);
+                        long shifted = imm16 << shift;
+
+                        writeBackValue = (currentValue & mask) | shifted;
+                    }
+
                     registerController.writeRegister(Instruction.extractBits(instructionBitSet, 0, 4), writeBackValue, true);
                 }
             }

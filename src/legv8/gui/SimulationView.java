@@ -71,6 +71,8 @@ public class SimulationView extends JFrame implements ActionListener {
         initComponents();
         layoutComponents();
 
+        this.simulatorEngine = engine;
+
         simulationTimer = new Timer(simulationDelayMs, e -> stepExecution());    
         simulationTimer.setInitialDelay(simulationDelayMs);
         simulationTimer.setDelay(simulationDelayMs);
@@ -539,7 +541,7 @@ public class SimulationView extends JFrame implements ActionListener {
         }
         
         try {
-            microSteps.clear();
+            if (microSteps != null) microSteps.clear();
             microSteps = simulatorEngine.getMicroSteps();
         } catch (SimulationException e) {
             JOptionPane.showMessageDialog(this, "Error during simulation: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);

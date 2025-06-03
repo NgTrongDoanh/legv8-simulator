@@ -38,13 +38,13 @@ public class RFormatInstruction extends Instruction {
         String mnemonic = definition.getMnemonic();
         
         switch (mnemonic) {
-            case "LSL", "LSR", "ASR":
+            case "LSL", "LSR":
                 return String.format("%-6s X%d, X%d, #%d", mnemonic, rd, rn, shamt);
 
             case "BR": 
                 return String.format("%-6s X%d", mnemonic, rn);
      
-            case "ADD", "ADDS", "SUB", "SUBS", "AND", "ANDS", "ORR", "EOR", "MUL", "SMULH", "UMULH", "SDIV", "UDIV": 
+            case "ADD", "ADDS", "SUB", "SUBS", "AND", "ANDS", "ORR", "EOR": 
                 return String.format("%-6s X%d, X%d, X%d", mnemonic, rd, rn, rm);
 
             default:

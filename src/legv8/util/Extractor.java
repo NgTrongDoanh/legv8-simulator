@@ -77,7 +77,7 @@ public class Extractor {
             throw new IllegalArgumentException("Instruction BitSet cannot be null.");
         }
 
-        int rawValue; 
+        int rawValue = 0; 
         int numBits;  
 
         switch (format) {
@@ -110,14 +110,12 @@ public class Extractor {
                 return result;
 
             case 'R': 
-                if (mnemonic.equals("LSL") || mnemonic.equals("LSR") || mnemonic.equals("ASR")) {
-                    rawValue = Instruction.extractBits(instructionBits, 10, 1); 
+                if (mnemonic.equals("LSL") || mnemonic.equals("LSR")) {
+                    rawValue = Instruction.extractBits(instructionBits, 10, 15) & 0x3F; 
                     numBits = 6;
-                } else {
-                    throw new IllegalArgumentException("Unsupported R-format instruction for sign extension: " + mnemonic);
                 }
                 
-                return (long) rawValue; 
+                return rawValue;
 
             default:
                 throw new IllegalArgumentException("Unsupported format for sign extension: " + format);
@@ -135,7 +133,7 @@ public class Extractor {
      * @throws IllegalArgumentException if the format is unsupported.
      */
     public static long extractAndExtend(int instruction, char format, String mnemonic) {
-        int rawValue; 
+        int rawValue = 0; 
         int numBits;  
 
         switch (format) {
@@ -171,11 +169,9 @@ public class Extractor {
                 if (mnemonic.equals("LSL") || mnemonic.equals("LSR") || mnemonic.equals("ASR")) {
                     rawValue = (instruction >>> 10) & 0x3F; 
                     numBits = 6;
-                } else {
-                    throw new IllegalArgumentException("Unsupported R-format instruction for sign extension: " + mnemonic);
                 }
                 
-                return rawValue & 0x3F;
+                return rawValue;
                 
             default:
                 throw new IllegalArgumentException("Unsupported format for sign extension: " + format);
