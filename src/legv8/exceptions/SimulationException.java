@@ -18,6 +18,12 @@ public class SimulationException extends Exception {
     // The cycle number at which the error occurred
     private final long errorCycle;
 
+    public SimulationException(String message, Throwable cause, long errorPC) {
+        super(message, cause);
+        this.errorPC = errorPC;
+        this.errorCycle = -1; // Default to -1 if cycle is not specified
+    }
+
     public SimulationException(String message, long errorPC, long errorCycle) {
         super(message);
         this.errorPC = errorPC;

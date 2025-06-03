@@ -40,20 +40,17 @@ public class DataMemoryController {
 
     /**
      * Performs a memory access operation (read or write or neither) based on control signals.
-     * Reads or writes a 64-bit long value (doubleword).
-     * Enforces 8-byte alignment for LDUR/STUR operations implicitly via the underlying storage checks.
-     * Validates control signals to prevent simultaneous read and write.
-     *
+     * Reads or writes a byte (8 bits).
      * @param address The 64-bit byte address for the memory access (typically from ALU result).
-     * @param writeData The 64-bit data to write to memory if MemWrite is asserted (typically from RF ReadData2).
+     * @param writeData The 64-bit data to write to memory if MemWrite is asserted (typically from register file).
      * @param memWrite Control signal: If true, performs a memory write.
      * @param memRead Control signal: If true, performs a memory read.
-     * @return The 64-bit data read from memory if MemRead is true, otherwise returns 0L.
+     * @return The byte (8-bit) data read from memory if MemRead is true, otherwise 0.
      * @throws MemoryAccessException if the address is invalid (e.g., negative), misaligned,
-     *                              or if both MemRead and MemWrite are asserted simultaneously.
+     *                                 or if both MemRead and MemWrite are asserted simultaneously.
      */
-    public long accessMemory(long address, long writeData, boolean memWrite, boolean memRead) {
-        if (address < MemoryStorage.MIN_ADDRESS && (memRead || memWrite)) {
+    public byte accessMemory_byte(long address, long writeData, boolean memWrite, boolean memRead) {
+        if (address < MemoryStorage.MIN_ADDRESS) {
             throw new MemoryAccessException("Negative memory address accessed", address);
         }
         
@@ -61,26 +58,163 @@ public class DataMemoryController {
             throw new MemoryAccessException("Conflicting memory access signals (both MemWrite and MemRead are true)", address);
         }
         
-        long readValue = 0L;
-        writeData = writeData & MemoryStorage.VALUE_MASK; 
+        byte readValue = 0;
+        byte byteWriteData = (byte) (writeData & 0xFF); 
         if (memWrite) {
             System.out.printf("%s(DataMemoryControl) Write: [0x%X] <= 0x%X\n", ColoredLog.INFO, address, writeData);
             try {
-                storage.writeLong(address, writeData);
-            } catch (Exception e) { 
+                storage.writeByte(address, byteWriteData);
+            } catch (Exception e) {
                 throw new MemoryAccessException("Error during memory write at 0x", e, address);
             }
         } else if (memRead) {
             try {
-                readValue = storage.readLong(address);
-                System.out.printf("%(DataMemoryControl) Read: [0x%X] => 0x%X\n", ColoredLog.INFO, address, readValue);
+                readValue = storage.readByte(address);
+                System.out.printf("%s(DataMemoryControl) Read: [0x%X] => 0x%X\n", ColoredLog.INFO, address, readValue);
             } catch (Exception e) {
                 throw new MemoryAccessException("Error during memory read at 0x", e, address);
             }
         } else {
             System.out.printf("%s(DataMemoryControl) Inactive: Addr=0x%X\n",ColoredLog.INFO, address);
         }
-        return readValue & MemoryStorage.VALUE_MASK; 
+        return readValue;
+    }
+
+    /**
+     * Performs a memory access operation (read or write or neither) based on control signals.
+     * Reads or writes a halfword (16 bits).
+     * @param address The 64-bit byte address for the memory access (typically from ALU result).
+     * @param writeData The 64-bit data to write to memory if MemWrite is asserted (typically from register file).
+     * @param memWrite Control signal: If true, performs a memory write.
+     * @param memRead Control signal: If true, performs a memory read.
+     * @return The 16-bit data read from memory if MemRead is true, otherwise 0.
+     * @throws MemoryAccessException if the address is invalid (e.g., negative), misaligned,
+     *                                 or if both MemRead and MemWrite are asserted simultaneously.
+     */
+    public short accessMemory_halfword(long address, long writeData, boolean memWrite, boolean memRead) {
+        if (address < MemoryStorage.MIN_ADDRESS) {
+            throw new MemoryAccessException("Negative memory address accessed", address);
+        }
+        
+        if (memWrite && memRead) {
+            throw new MemoryAccessException("Conflicting memory access signals (both MemWrite and MemRead are true)", address);
+        }
+        
+        if (address % 2 != 0) {
+            throw new MemoryAccessException("Unaligned halfword access", address);
+        }
+
+        short readValue = 0;
+        short halfwordWriteData = (short) (writeData & 0xFFFF); 
+        if (memWrite) {
+            System.out.printf("%s(DataMemoryControl) Write: [0x%X] <= 0x%X\n", ColoredLog.INFO, address, writeData);
+            try {
+                storage.writeHalfWord(address, halfwordWriteData);
+            } catch (Exception e) {
+                throw new MemoryAccessException("Error during memory write at 0x", e, address);
+            }
+        } else if (memRead) {
+            try {
+                readValue = storage.readHalfWord(address);
+                System.out.printf("%s(DataMemoryControl) Read: [0x%X] => 0x%X\n", ColoredLog.INFO, address, readValue);
+            } catch (Exception e) {
+                throw new MemoryAccessException("Error during memory read at 0x", e, address);
+            }
+        } else {
+            System.out.printf("%s(DataMemoryControl) Inactive: Addr=0x%X\n",ColoredLog.INFO, address);
+        }
+        return readValue;
+    }
+
+    /**
+     * Performs a memory access operation (read or write or neither) based on control signals.
+     * Reads or writes a word (32 bits).
+     * @param address The 64-bit byte address for the memory access (typically from ALU result).
+     * @param writeData The 64-bit data to write to memory if MemWrite is asserted (typically from register file).
+     * @param memWrite Control signal: If true, performs a memory write.
+     * @param memRead Control signal: If true, performs a memory read.
+     * @return The 32-bit data read from memory if MemRead is true, otherwise 0.
+     * @throws MemoryAccessException if the address is invalid (e.g., negative), misaligned,
+     *                                 or if both MemRead and MemWrite are asserted simultaneously.
+     */
+    public int accessMemory_word(long address, long writeData, boolean memWrite, boolean memRead) {
+        if (address < MemoryStorage.MIN_ADDRESS) {
+            throw new MemoryAccessException("Negative memory address accessed", address);
+        }
+        
+        if (memWrite && memRead) {
+            throw new MemoryAccessException("Conflicting memory access signals (both MemWrite and MemRead are true)", address);
+        }
+        
+        if (address % 4 != 0) {
+            throw new MemoryAccessException("Unaligned word access", address);
+        }
+
+        int readValue = 0;
+        int wordWriteData = (int) (writeData & 0xFFFFFFFF); 
+        if (memWrite) {
+            System.out.printf("%s(DataMemoryControl) Write: [0x%X] <= 0x%X\n", ColoredLog.INFO, address, writeData);
+            try {
+                storage.writeWord(address, wordWriteData);
+            } catch (Exception e) {
+                throw new MemoryAccessException("Error during memory write at 0x", e, address);
+            }
+        } else if (memRead) {
+            try {
+                readValue = storage.readWord(address);
+                System.out.printf("%s(DataMemoryControl) Read: [0x%X] => 0x%X\n", ColoredLog.INFO, address, readValue);
+            } catch (Exception e) {
+                throw new MemoryAccessException("Error during memory read at 0x", e, address);
+            }
+        } else {
+            System.out.printf("%s(DataMemoryControl) Inactive: Addr=0x%X\n",ColoredLog.INFO, address);
+        }
+        return readValue;
+    }
+
+    /**
+     * Performs a memory access operation (read or write or neither) based on control signals.
+     * Reads or writes a double word (64 bits).
+     * @param address The 64-bit byte address for the memory access (typically from ALU result).
+     * @param writeData The 64-bit data to write to memory if MemWrite is asserted (typically from register file).
+     * @param memWrite Control signal: If true, performs a memory write.
+     * @param memRead Control signal: If true, performs a memory read.
+     * @return The 64-bit data read from memory if MemRead is true, otherwise 0.
+     * @throws MemoryAccessException if the address is invalid (e.g., negative), misaligned,
+     *                                 or if both MemRead and MemWrite are asserted simultaneously.
+     */
+    public long accessMemory_doubleWord(long address, long writeData, boolean memWrite, boolean memRead) {
+        if (address < MemoryStorage.MIN_ADDRESS) {
+            throw new MemoryAccessException("Negative memory address accessed", address);
+        }
+        
+        if (memWrite && memRead) {
+            throw new MemoryAccessException("Conflicting memory access signals (both MemWrite and MemRead are true)", address);
+        }
+
+        if (address % 8 != 0) {
+            throw new MemoryAccessException("Unaligned double word access", address);
+        }
+        
+        long readValue = 0;
+        if (memWrite) {
+            System.out.printf("%s(DataMemoryControl) Write: [0x%X] <= 0x%X\n", ColoredLog.INFO, address, writeData);
+            try {
+                storage.writeDoubleWord(address, writeData);
+            } catch (Exception e) {
+                throw new MemoryAccessException("Error during memory write at 0x", e, address);
+            }
+        } else if (memRead) {
+            try {
+                readValue = storage.readDoubleWord(address);
+                System.out.printf("%s(DataMemoryControl) Read: [0x%X] => 0x%X\n", ColoredLog.INFO, address, readValue);
+            } catch (Exception e) {
+                throw new MemoryAccessException("Error during memory read at 0x", e, address);
+            }
+        } else {
+            System.out.printf("%s(DataMemoryControl) Inactive: Addr=0x%X\n",ColoredLog.INFO, address);
+        }
+        return readValue;
     }
 
     /**

@@ -4,7 +4,6 @@
  */
 package legv8.instructions;
 
-import legv8.util.ColoredLog;
 import legv8.util.ControlSignals;
 
 /**
@@ -14,8 +13,8 @@ import legv8.util.ControlSignals;
 public class InstructionDefinition {
     // --- Fields ---
     private final String mnemonic;
-    private final char format; 
-    private final String opcodeIdentifierString; 
+    private final char format;  // R: R-format, I: I-format, D: D-format, B: B-format, C: CB-format, M: IM-format
+    private final int opcode; 
     private final ControlSignals controlSignals;
 
     
@@ -24,14 +23,28 @@ public class InstructionDefinition {
     /**
      * Constructor for InstructionDefinition.
      * @param mnemonic The mnemonic of the instruction.
-     * @param format The format of the instruction (e.g., 'I', 'D', 'B', etc.).
+     * @param format The format of the instruction (R: R-format, I: I-format, D: D-format, B: B-format, C: CB-format, M: IM-format).
+     * @param opcode The opcode of the instruction.
+     * @param controlSignals The control signals associated with the instruction.
+     */
+    public InstructionDefinition(String mnemonic, char format, int opcode, ControlSignals controlSignals) {
+        this.mnemonic = mnemonic;
+        this.format = format;
+        this.opcode = opcode;
+        this.controlSignals = controlSignals;
+    }
+
+        /**
+     * Constructor for InstructionDefinition.
+     * @param mnemonic The mnemonic of the instruction.
+     * @param format The format of the instruction (R: R-format, I: I-format, D: D-format, B: B-format, C: CB-format, M: IM-format).
      * @param opcodeIdentifierString The opcode identifier string in binary format.
      * @param controlSignals The control signals associated with the instruction.
      */
     public InstructionDefinition(String mnemonic, char format, String opcodeIdentifierString, ControlSignals controlSignals) {
         this.mnemonic = mnemonic;
         this.format = format;
-        this.opcodeIdentifierString = opcodeIdentifierString;
+        this.opcode = Integer.parseInt(opcodeIdentifierString, 2);
         this.controlSignals = controlSignals;    
     }
     
@@ -53,10 +66,17 @@ public class InstructionDefinition {
     }
 
     /**
+     * @return The opcode of the instruction as an integer.
+     */
+    public int getOpcode() {
+        return opcode;
+    }
+
+    /**
      * @return The opcode identifier string in binary format.
      */
     public String getOpcodeIdentifierString() {
-        return opcodeIdentifierString;
+        return Integer.toBinaryString(opcode);
     }
 
     /**
@@ -64,19 +84,6 @@ public class InstructionDefinition {
      */
     public ControlSignals getControlSignals() {
         return controlSignals;
-    }
-
-    /**
-     * @return The opcode identifier value as an integer.
-     *         This is obtained by parsing the opcode identifier string as a binary number.
-     */
-    public int getOpcodeIdentifierValue() {
-        try {
-            return Integer.parseInt(opcodeIdentifierString, 2);
-        } catch (NumberFormatException e) {
-            System.err.println(ColoredLog.ERROR + "Error parsing opcode identifier string '" + opcodeIdentifierString + "' for " + mnemonic);
-            return -1;
-        }
     }
     
     // --- Utility Methods ---
@@ -88,7 +95,7 @@ public class InstructionDefinition {
     public String toString() {
         return String.format(
             "InstructionDefinition [mnemonic=%-6s, format=%c, opcodeIdentifierString=%-11s, controlSignals={%s}]",
-            mnemonic, format, opcodeIdentifierString, controlSignals
+            mnemonic, format, getOpcodeIdentifierString(), controlSignals
         );
     }
 }

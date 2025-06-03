@@ -28,33 +28,33 @@ public final class FlagBranchControl {
     public static FlagControl getBranchCond(boolean nFlag, boolean zFlag, boolean cFlag, boolean vFlag, int condCode) {
         condCode &= 0xF; 
         switch (condCode) {
-                case 0b0000: 
+                case 0b0000: // EQ
                     return new FlagControl(zFlag, "Z: " + zFlag);
-                case 0b0001: 
+                case 0b0001: // NE
                     return new FlagControl(!zFlag, "Z: " + zFlag);
-                case 0b0010: 
+                case 0b0010: // HS
                     return new FlagControl(cFlag, "C: " + cFlag);
-                case 0b0011: 
+                case 0b0011: // LO
                     return new FlagControl(!cFlag, "C: " + cFlag);
-                case 0b0100: 
+                case 0b0100: // MI
                     return new FlagControl(nFlag, "N: " + nFlag);
                 case 0b0101: 
                     return new FlagControl(!nFlag, "N: " + nFlag);
-                case 0b0110: 
+                case 0b0110: // VS
                     return new FlagControl(vFlag, "V: " + vFlag);
-                case 0b0111: 
+                case 0b0111: // VC
                     return new FlagControl(!vFlag, "V: " + vFlag);
-                case 0b1000: 
+                case 0b1000: // HI
                     return new FlagControl(cFlag && !zFlag, "C: " + cFlag + ", Z: " + zFlag);
-                case 0b1001: 
+                case 0b1001: // LS
                     return new FlagControl(!cFlag || zFlag, "C: " + cFlag + ", Z: " + zFlag);
-                case 0b1010: 
+                case 0b1010: // GE
                     return new FlagControl(nFlag == vFlag, "N: " + nFlag + ", V: " + vFlag);
-                case 0b1011: 
+                case 0b1011: // LT
                     return new FlagControl(nFlag != vFlag, "N: " + nFlag + ", V: " + vFlag);
-                case 0b1100: 
+                case 0b1100: // GT
                     return new FlagControl(!zFlag && (nFlag == vFlag), "Z: " + zFlag + ", N: " + nFlag + ", V: " + vFlag);
-                case 0b1101: 
+                case 0b1101: // LE
                     return new FlagControl(zFlag || (nFlag != vFlag), "Z: " + zFlag + ", N: " + nFlag + ", V: " + vFlag);
                 default: 
                     return new FlagControl(false, "Invalid condition code: " + condCode);

@@ -106,85 +106,81 @@ public class MemoryStorage {
     }
 
     /**
-     * Reads a long value (8 bytes) from memory starting at the given address.
+     * Reads a byte (1 byte) from memory starting at the given address.
      * @param address The address to read from.
-     * @return The long value read from memory.
+     * @return The byte value read from memory.
      */
-    public long readLong(long address) {
-        byte[] data = readBytes(address, 8); 
-        return ByteBuffer.wrap(data).order(ENDIANNESS).getLong();
+    public byte readByte(long address) {
+        return readBytes(address, 1)[0];
     }
 
     /**
-     * Writes a long value (8 bytes) to memory starting at the given address.
+     * Writes a byte (1 byte) to memory starting at the given address.
      * @param address The address to write to.
-     * @param value The long value to write.
+     * @param value The byte value to write.
      */
-    public void writeLong(long address, long value) {
-        byte[] data = ByteBuffer.allocate(8).order(ENDIANNESS).putLong(value).array();
-        writeBytes(address, data); 
+    public void writeByte(long address, byte value) {
+        writeBytes(address, new byte[]{value});
     }
 
     /**
-     * Reads an integer value (4 bytes) from memory starting at the given address.
-     * @param address The address to read from.
-     * @return The integer value read from memory.
-     */
-    public int readInt(long address) {
-        byte[] data = readBytes(address, 4);
-        return ByteBuffer.wrap(data).order(ENDIANNESS).getInt();
-    }
-
-    /**
-     * Writes an integer value (4 bytes) to memory starting at the given address.
-     * @param address The address to write to.
-     * @param value The integer value to write.
-     */
-    public void writeInt(long address, int value) {
-        byte[] data = ByteBuffer.allocate(4).order(ENDIANNESS).putInt(value).array();
-        writeBytes(address, data);
-    }
-
-    /**
-     * Reads a short value (2 bytes) from memory starting at the given address.
+     * Reads a half-word (2 bytes) from memory starting at the given address.
      * @param address The address to read from.
      * @return The short value read from memory.
      */
-    public short readShort(long address) {
+    public short readHalfWord(long address) {
         byte[] data = readBytes(address, 2);
         return ByteBuffer.wrap(data).order(ENDIANNESS).getShort();
     }
 
     /**
-     * Writes a short value (2 bytes) to memory starting at the given address.
+     * Writes a half-word (2 bytes) to memory starting at the given address.
      * @param address The address to write to.
      * @param value The short value to write.
      */
-    public void writeShort(long address, short value) {
+    public void writeHalfWord(long address, short value) {
         byte[] data = ByteBuffer.allocate(2).order(ENDIANNESS).putShort(value).array();
         writeBytes(address, data);
     }
 
     /**
-     * Reads a byte value from memory at the given address.
+     * Reads a word (4 bytes) from memory starting at the given address.
      * @param address The address to read from.
-     * @return The byte value read from memory.
+     * @return The int value read from memory.
      */
-    public byte readByte(long address) { 
-        checkAddress(address); 
-        return this.memory.getOrDefault(address, (byte) 0);
+    public int readWord(long address) {
+        byte[] data = readBytes(address, 4);
+        return ByteBuffer.wrap(data).order(ENDIANNESS).getInt();
     }
 
     /**
-     * Writes a byte value to memory at the given address.
+     * Writes a word (4 bytes) to memory starting at the given address.
      * @param address The address to write to.
-     * @param value The byte value to write.
+     * @param value The int value to write.
      */
-    public void writeByte(long address, byte value) {
-        checkAddress(address); 
+    public void writeWord(long address, int value) {
+        byte[] data = ByteBuffer.allocate(4).order(ENDIANNESS).putInt(value).array();
+        writeBytes(address, data);
+    }
 
-        if (value == 0) memory.remove(address);
-        else memory.put(address, value);
+    /**
+     * Reads a double word (8 bytes) from memory starting at the given address.
+     * @param address The address to read from.
+     * @return The long value read from memory.
+     */
+    public long readDoubleWord(long address) {
+        byte[] data = readBytes(address, 8);
+        return ByteBuffer.wrap(data).order(ENDIANNESS).getLong();
+    }
+
+    /**
+     * Writes a double word (8 bytes) to memory starting at the given address.
+     * @param address The address to write to.
+     * @param value The long value to write.
+     */
+    public void writeDoubleWord(long address, long value) {
+        byte[] data = ByteBuffer.allocate(8).order(ENDIANNESS).putLong(value).array();
+        writeBytes(address, data);
     }
 
     /**
@@ -192,7 +188,7 @@ public class MemoryStorage {
      * @return A map containing the memory contents, where the key is the address and the value is the byte at that address.
      *         The map is a copy of the original memory map.
      */
-    public Map<Long, Byte> getMemoryContents() {
+    public Map<Long, Byte> getMemory_Bytes() {
         return new HashMap<>(this.memory);
     }
 
@@ -202,7 +198,7 @@ public class MemoryStorage {
      * @param endAddress The ending address to read to.
      * @return A map containing the memory contents, where the key is the address and the value is the long value at that address.
      */
-    public Map<Long, Long> getMemoryContentsLong(long startAddress, long endAddress) {
+    public Map<Long, Long> getMemory_doubleWord(long startAddress, long endAddress) {
         checkAddress(startAddress); 
         checkAddress(endAddress);
         
@@ -217,7 +213,7 @@ public class MemoryStorage {
         
         Map<Long, Long> longMemory = new HashMap<>();
         for (long address = startAddress; address <= endAddress; address += 8) {
-            longMemory.put(address, readLong(address));
+            longMemory.put(address, readDoubleWord(address));
         }
 
         return longMemory;
@@ -255,7 +251,7 @@ public class MemoryStorage {
         
         for (long address = startAddress; address <= endAddress; address += 8) {
             sb.append(String.format("  0x%08X : 0x%016X (%d)\n",
-                                    address, readLong(address), readLong(address)));
+                                    address, readDoubleWord(address), readDoubleWord(address)));
         }
 
         System.out.println(ColoredLog.INFO + "Memory Storage Contents:\n");

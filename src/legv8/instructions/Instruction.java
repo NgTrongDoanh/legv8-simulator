@@ -29,13 +29,13 @@ public abstract class Instruction {
      * @param definition The InstructionDefinition for this instruction.
      */
     protected Instruction(BitSet bytecode, InstructionDefinition definition) { 
+        this.bytecode = (BitSet) Objects.requireNonNull(bytecode, ColoredLog.WARNING + "Bytecode cannot be null.").clone();
+        this.definition = Objects.requireNonNull(definition, ColoredLog.WARNING + "InstructionDefinition cannot be null for standard instruction creation.");
+
         if (bytecode.length() > 32) {
             System.err.printf("%sWarning: Bytecode provided to Instruction constructor has length %d (> 32) for %s.\n",
                                 ColoredLog.WARNING, bytecode.length(), definition.getMnemonic());
         }
-        
-        this.bytecode = (BitSet) Objects.requireNonNull(bytecode, ColoredLog.WARNING + "Bytecode cannot be null.").clone();
-        this.definition = Objects.requireNonNull(definition, ColoredLog.WARNING + "InstructionDefinition cannot be null for standard instruction creation.");
     }
 
     
@@ -85,7 +85,8 @@ public abstract class Instruction {
     // CB-Format Instruction
     public int getOpcode_CB()   { return extractBits(bytecode, 24, 31); } 
     public int getAddress_CB()  { return extractBits(bytecode, 5, 23); } 
-    public int getRt_CB()       { return extractBits(bytecode, 0, 4); }  // 5 bits (Rt for CBZ/NZ, Cond for B.cond)
+    public int getRt_CB()       { return extractBits(bytecode, 0, 4); }  // 5 bits (Rt for CBZ/NZ)
+    public int getCond_CB()    { return extractBits(bytecode, 0, 3); }  // 4 bits (Cond for B.cond)
 
     // I-Format Immediate Instruction
     public int getOpcode_IM()   { return extractBits(bytecode, 23, 31); } 

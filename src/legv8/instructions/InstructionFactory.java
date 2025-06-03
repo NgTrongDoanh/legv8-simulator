@@ -199,7 +199,7 @@ public class InstructionFactory {
         }       
 
         BitSet bytecode = new BitSet(32);
-        int opcode = def.getOpcodeIdentifierValue();
+        int opcode = def.getOpcode();
         if (opcode == -1) throw new AssemblyException("Internal error: Invalid opcode identifier for " + mnemonic);
 
         try {   

@@ -101,7 +101,7 @@ public class Application extends JFrame implements ActionListener {
      */
     private void initComponents() {
         // Load default configuration
-        configLoader.loadConfig("./resources/config/instructions_config.csv"); 
+        configLoader.loadConfig("./resources/config/instructions.csv"); 
         InstructionFactory.initialize(configLoader); 
 
         lblStatus = new JLabel("Status: Load Assembly or change Config", SwingConstants.CENTER);

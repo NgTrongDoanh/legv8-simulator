@@ -28,12 +28,8 @@ public class Extractor {
      * @throws IllegalArgumentException if originalBits is not in the range 1-32.
      */
     public static long extend(int value, int originalBits) {
-        if (originalBits <= 0 || originalBits > 32) {
-            throw new IllegalArgumentException("originalBits for int input must be 1-32, was: " + originalBits);
-        }
-        if (originalBits == 32) {
-            return value; 
-        }
+        if (originalBits <= 0 || originalBits > 32) throw new IllegalArgumentException("originalBits for int input must be 1-32, was: " + originalBits);
+        if (originalBits == 32) return value; 
 
         int signBitMask = 1 << (originalBits - 1);
         long lowerMask = (1L << originalBits) - 1;
@@ -54,14 +50,9 @@ public class Extractor {
      * @throws IllegalArgumentException if originalBits is not in the range 1-64.
      */
     public static long extend(long value, int originalBits) {
-        if (originalBits <= 0 || originalBits > 64) {
-            throw new IllegalArgumentException("originalBits for long input must be 1-64, was: " + originalBits);
-        }
-
-        if (originalBits == 64) {
-            return value; 
-        }
-
+        if (originalBits <= 0 || originalBits > 64) throw new IllegalArgumentException("originalBits for long input must be 1-64, was: " + originalBits);
+        if (originalBits == 64) return value; 
+        
         long signBitMask = 1L << (originalBits - 1);
         long lowerMask = (1L << originalBits) - 1;
 
@@ -94,18 +85,22 @@ public class Extractor {
                 rawValue = Instruction.extractBits(instructionBits, 0, 25);
                 numBits = 26;
                 break;
+
             case 'C': 
                 rawValue = Instruction.extractBits(instructionBits, 5, 23);
                 numBits = 19;
                 break;
+
             case 'I': 
                 rawValue = Instruction.extractBits(instructionBits, 10, 21);
                 numBits = 12;
                 break;
+
             case 'D': 
                 rawValue = Instruction.extractBits(instructionBits, 12, 20);
                 numBits = 9;
                 break;
+
             case 'M': 
                 int hw = Instruction.extractBits(instructionBits, 21, 22); 
                 int imm16 = Instruction.extractBits(instructionBits, 5, 20); 
@@ -113,6 +108,7 @@ public class Extractor {
                 int shiftAmount = hw * 16;        
                 long result = (long)imm16 << shiftAmount;
                 return result;
+
             case 'R': 
                 if (mnemonic.equals("LSL") || mnemonic.equals("LSR") || mnemonic.equals("ASR")) {
                     rawValue = Instruction.extractBits(instructionBits, 10, 1); 
@@ -121,7 +117,8 @@ public class Extractor {
                     throw new IllegalArgumentException("Unsupported R-format instruction for sign extension: " + mnemonic);
                 }
                 
-                return 0;
+                return (long) rawValue; 
+
             default:
                 throw new IllegalArgumentException("Unsupported format for sign extension: " + format);
         }
@@ -143,40 +140,42 @@ public class Extractor {
 
         switch (format) {
             case 'B': 
-                
                 rawValue = instruction & 0x3FFFFFF; 
                 numBits = 26;
                 break;
-            case 'C': 
-                
+
+            case 'C': // CB
                 rawValue = (instruction >>> 5) & 0x7FFFF; 
                 numBits = 19;
                 break;
+
             case 'I': 
-                
                 rawValue = (instruction >>> 10) & 0xFFF; 
                 numBits = 12;
                 break;
+
             case 'D': 
-                
                 rawValue = (instruction >>> 12) & 0x1FF; 
                 numBits = 9;
                 break;
-            case 'M':
+
+            case 'M': // IM
                 int hw = (instruction >>> 21) & 0x3; 
                 int imm16 = (instruction >>> 5) & 0xFFFF; 
                 
                 int shiftAmount = hw * 16;          
                 long result = (long)imm16 << shiftAmount;
                 return result;
+                
             case 'R':
                 if (mnemonic.equals("LSL") || mnemonic.equals("LSR") || mnemonic.equals("ASR")) {
                     rawValue = (instruction >>> 10) & 0x3F; 
                     numBits = 6;
                 } else {
-                    return 0;
+                    throw new IllegalArgumentException("Unsupported R-format instruction for sign extension: " + mnemonic);
                 }
-                break;
+                
+                return rawValue & 0x3F;
                 
             default:
                 throw new IllegalArgumentException("Unsupported format for sign extension: " + format);

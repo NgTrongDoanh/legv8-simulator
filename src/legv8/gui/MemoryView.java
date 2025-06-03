@@ -22,7 +22,7 @@ import java.util.TreeMap;
  */
 public class MemoryView extends StateDisplayFrame {
     // Data references
-    private MemoryStorage memoryStorageRef; 
+    private MemoryStorage memoryStorageRef;
 
     // GUI components
     private JPanel inputPanel;
@@ -116,18 +116,6 @@ public class MemoryView extends StateDisplayFrame {
         try {
             long startAddr = parseAddress(startAddrStr);
             long endAddr = parseAddress(endAddrStr);
-
-            if (startAddr < 0 || endAddr < 0) {
-                throw new NumberFormatException("Address cannot be negative.");
-            }
-            if (endAddr <= startAddr) {            
-                if (endAddr < startAddr) {
-                    JOptionPane.showMessageDialog(this,
-                        "End Address must be greater than Start Address.",
-                        "Address Range Error", JOptionPane.WARNING_MESSAGE);
-                    return; 
-                }
-            }
             
             updateData(memoryStorageRef, startAddr, endAddr, -1L);
         } catch (NumberFormatException ex) {
@@ -180,7 +168,7 @@ public class MemoryView extends StateDisplayFrame {
         if (storage == null) return;
         this.memoryStorageRef = storage; 
  
-        Map<Long, Long> memoryContents = storage.getMemoryContentsLong(startAddressByte, endAddressByte);        
+        Map<Long, Long> memoryContents = storage.getMemory_doubleWord(startAddressByte, endAddressByte);
         Map<Long, Long> sortedMemory = new TreeMap<>(memoryContents);
 
         List<Object[]> displayData = new ArrayList<>();
@@ -192,19 +180,17 @@ public class MemoryView extends StateDisplayFrame {
             long value = entry.getValue();
 
             if (address >= startAddressByte && address < endAddressByte) {
-                if (address >= 0 && address % 8 == 0) {
-                    Object[] row = new Object[4];
-                    row[0] = String.format("0x%08X", address); 
-                    row[1] = address / 8; 
-                    row[2] = String.format("0x%016X", value);
-                    row[3] = Long.toString(value);
-                    displayData.add(row);
+                Object[] row = new Object[4];
+                row[0] = String.format("0x%08X", address); 
+                row[1] = address / 8; 
+                row[2] = String.format("0x%016X", value);
+                row[3] = Long.toString(value);
+                displayData.add(row);
 
-                    if (lastChangedAddrByte >= address && lastChangedAddrByte < (address + 8)) {
-                        highlightRow = displayIndex;
-                    }
-                    displayIndex++;
+                if (lastChangedAddrByte >= address && lastChangedAddrByte < (address + 8)) {
+                    highlightRow = displayIndex;
                 }
+                displayIndex++;
             }
         }
 

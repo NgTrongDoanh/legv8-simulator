@@ -189,6 +189,7 @@ public class AssemblyEditor extends JFrame implements ActionListener {
         List<String> codeLines = Arrays.asList(code.split("\\r?\\n")); 
 
         boolean proceed = true;
+
         if (hasUnsavedChanges) {
             int choice = JOptionPane.showConfirmDialog(this,
                 "There are unsaved changes. Save before assembling?",
@@ -201,12 +202,15 @@ public class AssemblyEditor extends JFrame implements ActionListener {
         }
 
         if (proceed) {
-            instructions = assembler.assemble(codeLines);
-            if (instructions != null) {         
-                JOptionPane.showMessageDialog(this, "Assembly successful! " + instructions.size() + " instructions generated.", "Assembly Success", JOptionPane.INFORMATION_MESSAGE);
-                for (Instruction instruction : instructions) System.out.println(instruction);
-            } else {
-                JOptionPane.showMessageDialog(this, "Assembly failed. Check the code for errors.", "Assembly Error", JOptionPane.ERROR_MESSAGE);
+            try {
+                instructions = assembler.assemble(codeLines);
+                if (instructions != null) {         
+                    JOptionPane.showMessageDialog(this, "Assembly successful! " + instructions.size() + " instructions generated.", "Assembly Success", JOptionPane.INFORMATION_MESSAGE);
+                    for (Instruction instruction : instructions) System.out.println(instruction);
+                }
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Assembly failed: " + ex.getMessage(), "Assembly Error", JOptionPane.ERROR_MESSAGE);
+                System.err.println(ColoredLog.ERROR + "Assembly failed: " + ex.getMessage());
             }
         }
     }

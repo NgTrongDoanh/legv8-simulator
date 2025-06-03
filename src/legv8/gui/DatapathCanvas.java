@@ -74,8 +74,8 @@ public class DatapathCanvas extends JPanel {
     // Default color for bus lines
     private Map<BusID, AnimationState> activeAnimations = new ConcurrentHashMap<>();
     private javax.swing.Timer animationTimer;
-    private final int ANIMATION_TICK_MS = 30; 
-    private long currentSimulationDelayMs = 200; 
+    private final int ANIMATION_TICK_MS = 20; 
+    private long simulationDelayMs = 500; 
 
     
     // --- Constructor ---
@@ -596,17 +596,6 @@ public class DatapathCanvas extends JPanel {
 
 
     // --- Helper Methods for getting/seting information ---
-
-    /**
-     * Sets the simulation speed delay for the animation timer.
-     * The delay is set to a minimum of 2 times the animation tick duration.
-     * @param delayMs The delay in milliseconds.
-     */
-    public void setSimulationSpeedDelay(int delayMs) {
-        this.currentSimulationDelayMs = Math.max(ANIMATION_TICK_MS * 2, delayMs); 
-        System.out.println(ColoredLog.SUCCESS + "DatapathCanvas: Simulation delay set to " + this.currentSimulationDelayMs + "ms");
-    } 
-    
     /**
      * Updates the state of the canvas based on the current microstep.
      * It updates the active components, buses, and animations based on the step information.
@@ -638,7 +627,7 @@ public class DatapathCanvas extends JPanel {
         for (Map.Entry<BusID, StepInfo> entry : busInfoForNewAnimations.entrySet()) {
             BusID busId = entry.getKey();
             StepInfo info = entry.getValue();
-            AnimationState newState = new AnimationState(busId, info.value(), startTime, this.currentSimulationDelayMs);
+            AnimationState newState = new AnimationState(busId, info.value(), startTime, this.simulationDelayMs);
             nextAnimationStates.put(busId, newState);        
         }
     

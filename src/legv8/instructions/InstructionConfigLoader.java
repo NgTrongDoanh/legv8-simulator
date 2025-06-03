@@ -118,40 +118,40 @@ public class InstructionConfigLoader {
                     }
 
                     String[] parts = line.split(",", -1); 
-                    if (parts.length != 15) { 
+                    if (parts.length != 16) { 
                         System.err.printf("%sConfigLoader WARNING line %d: Incorrect field count (%d, expected 14). Skipping: %s\n", ColoredLog.WARNING, lineNumber, parts.length, line);
                         continue;
                     }
 
                     try {
                         String mnemonic = parts[0].trim().toUpperCase();
-                        String formatStr = parts[1].trim().toUpperCase();
-                        String opcodeIdStr = parts[2].trim();
-                        if (opcodeIdStr.isEmpty()) {
-                            System.err.printf("%sConfigLoader WARNING line %d: Empty Opcode ID for %s. Skipping.\n", ColoredLog.WARNING, lineNumber, mnemonic);
-                            continue;
-                        }
 
+                        String formatStr = parts[1].trim().toUpperCase();
                         char formatChar = parseFormat(formatStr);
                         if (formatChar == '?') {
                             System.err.printf("%sConfigLoader WARNING line %d: Unknown format '%s' for %s. Skipping.\n", ColoredLog.WARNING, lineNumber, formatStr, mnemonic);
                             continue;
                         }
 
-                        int opcodeIdValue = Integer.parseInt(opcodeIdStr, 2);
-                       
-                        boolean regWrite = parseFlag(parts[3], mnemonic, "RegW");
-                        boolean aluSrc = parseFlag(parts[4], mnemonic, "ALUSrc");
-                        boolean memWrite = parseFlag(parts[5], mnemonic, "MemW");
-                        boolean memRead = parseFlag(parts[6], mnemonic, "MemR");
-                        boolean memToReg = parseFlag(parts[7], mnemonic, "MemToReg");
-                        boolean zeroBranch = parseFlag(parts[8], mnemonic, "ZeroB");
-                        boolean flagBranch = parseFlag(parts[9], mnemonic, "FlagB");
-                        boolean uncondBranch = parseFlag(parts[10], mnemonic, "UncondB");
-                        boolean reg2Loc = parseFlag(parts[11], mnemonic, "Reg2Loc"); 
-                        boolean flagWrite = parseFlag(parts[12], mnemonic, "FlagW");
-                        int aluOp = parseBinary(parts[13], mnemonic, "FlagW");
-                        int operation = parseBinary(parts[14], mnemonic, "ALUOperation"); 
+                        String opcodeIdStr = parts[2].trim();
+                        int opcode = Integer.parseInt(opcodeIdStr, 2);
+                        if (opcodeIdStr.isEmpty()) {
+                            System.err.printf("%sConfigLoader WARNING line %d: Empty Opcode ID for %s. Skipping.\n", ColoredLog.WARNING, lineNumber, mnemonic);
+                            continue;
+                        }
+
+                        char reg2Loc = parseFlag(parts[3], mnemonic, "Reg2Loc");
+                        char uncondBranch = parseFlag(parts[4], mnemonic, "UncondBranch");
+                        char flagBranch = parseFlag(parts[5], mnemonic, "FlagBranch");
+                        char zeroBranch = parseFlag(parts[6], mnemonic, "ZeroBranch");
+                        char memRead = parseFlag(parts[7], mnemonic, "MemRead");
+                        char memToReg = parseFlag(parts[8], mnemonic, "MemToReg");
+                        char memWrite = parseFlag(parts[9], mnemonic, "MemWrite");
+                        char flagWrite = parseFlag(parts[10], mnemonic, "FlagWrite");
+                        char aluSrc = parseFlag(parts[11], mnemonic, "ALUSrc");
+                        int aluOp = parseBinary(parts[12], mnemonic, "ALUOp");
+                        char regWrite = parseFlag(parts[13], mnemonic, "RegWrite");
+                        int aluControlOut = parseBinary(parts[14], mnemonic, "ALUControlOut");
 
                         ControlSignals signals = new ControlSignals(
                             reg2Loc, uncondBranch, flagBranch, zeroBranch,
@@ -159,15 +159,16 @@ public class InstructionConfigLoader {
                             flagWrite,
                             aluSrc, aluOp,
                             regWrite,
-                            operation 
+                            aluControlOut
                         );
                         
                         InstructionDefinition definition = new InstructionDefinition(
-                            mnemonic, formatChar, opcodeIdStr, signals
+                            mnemonic, formatChar, opcode, signals
                         );
                         
-                        detailedDefinitionMap.computeIfAbsent(opcodeIdValue, k -> new HashMap<>()).put(formatChar, definition);
+                        detailedDefinitionMap.computeIfAbsent(opcode, k -> new HashMap<>()).put(formatChar, definition);
                         mnemonicMap.putIfAbsent(mnemonic, definition);
+
                     } catch (NumberFormatException e) {
                         System.err.printf("%sConfigLoader ERROR line %d: Invalid number format (OpcodeID?). Skipping: %s - %s\n", ColoredLog.FAILURE, lineNumber, line, e.getMessage());
                     } catch (ArrayIndexOutOfBoundsException e) {
@@ -229,15 +230,19 @@ public class InstructionConfigLoader {
      * @param flagName The name of the flag (for error messages).
      * @return The boolean value of the flag.
      */
-    private boolean parseFlag(String flagStr, String mnemonic, String flagName) {
+    private char parseFlag(String flagStr, String mnemonic, String flagName) {
         String trimmed = flagStr.trim();
-        if (trimmed.equals("1")) {
-            return true;
-        } else if (trimmed.equals("0")) {
-            return false;
+        if (trimmed.equals("x") || trimmed.equals("1") || trimmed.equals("0")) {
+            return trimmed.charAt(0); // '1' or '0' or 'x'
         } else {
-            return false;
+            throw new IllegalArgumentException(
+                String.format(
+                    "ConfigLoader ERROR: Invalid flag value '%s' for %s/%s. Expected '1', '0', or 'x'.", 
+                    trimmed, mnemonic, flagName
+                )
+            );
         }
+
     }
 
     /**
@@ -249,14 +254,17 @@ public class InstructionConfigLoader {
      */
     // NOTE: This method is not used in the current implementation but can be useful for future enhancements.
     // It is kept for potential future use.
-    private int parseInt(String intStr, String mnemonic, String fieldName) {
-        try {
-            return Integer.parseInt(intStr.trim());
-        } catch (NumberFormatException e) {
-            System.err.printf("%sConfigLoader WARNING: Invalid integer value '%s' for %s/%s. Assuming 0.\n", ColoredLog.WARNING, intStr, mnemonic, fieldName);
-            return 0; 
-        }
-    }
+    // private int parseInt(String intStr, String mnemonic, String fieldName) {
+    //     try {
+    //         if (intStr.equals("x")) {
+    //             return 404; // Treat x as 404 not found
+    //         }
+    //         return Integer.parseInt(intStr.trim());
+    //     } catch (NumberFormatException e) {
+    //         System.err.printf("%sConfigLoader WARNING: Invalid integer value '%s' for %s/%s. Assuming 0.\n", ColoredLog.WARNING, intStr, mnemonic, fieldName);
+    //         return 0; 
+    //     }
+    // }
 
     /**
      * Parses a binary string and returns its integer value.
@@ -267,8 +275,8 @@ public class InstructionConfigLoader {
      */
     private int parseBinary(String binStr, String mnemonic, String fieldName) {
         try {
-            if (binStr.equals("N/A") || binStr.equals("IDLE")) {
-                return 404; // Treat N/A or X as 0
+            if (binStr.equals("x")) {
+                return 404; // Treat x as 404 not found
             }
             return Integer.parseInt(binStr.trim(), 2);
         } catch (NumberFormatException e) {

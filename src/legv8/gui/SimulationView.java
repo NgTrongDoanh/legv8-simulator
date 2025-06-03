@@ -5,23 +5,14 @@
 
 package legv8.gui;
 
-import legv8.core.*;
-import legv8.datapath.*;
 import legv8.exceptions.*;
 import legv8.simulator.*;
-import legv8.storage.*;
 import legv8.util.*;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.*;
-
-import java.util.Objects;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * SimulationView is a GUI component that provides a visual representation of the LEGv8 simulator.
@@ -29,13 +20,12 @@ import java.util.Set;
  * The view includes buttons for running, pausing, stepping through instructions, and resetting the simulation.
  * It also provides sliders for adjusting simulation speed and buttons for showing/hiding register, memory, and instruction views.
  */
-public class SimulationView extends JFrame implements ActionListener, ChangeListener { 
+public class SimulationView extends JFrame implements ActionListener { 
 
     // --- Engine for simulation ---
     private SimulatorEngine simulatorEngine;
     
     // --- GUI Components ---
-    // DatapathCanvas is a custom component that visually represents the datapath of the LEGv8 processor.
     private DatapathCanvas datapathCanvas; 
     
     // Control buttons and sliders
@@ -44,8 +34,6 @@ public class SimulationView extends JFrame implements ActionListener, ChangeList
     private boolean isStep = false;
 
     private JButton btnNextIns, btnResetProgram;
-    private JSlider speedSlider;
-    private JLabel lblSpeed;
     private JButton btnShowRegisters, btnShowMemory, btnShowInstructions;
     private JButton btnCloseView;
     
@@ -60,14 +48,8 @@ public class SimulationView extends JFrame implements ActionListener, ChangeList
 
     // Simulation state variables
     private boolean isPaused = true;
-    private Timer simulationTimer;
-    private int simulationDelayMs = 200; 
-
-    // References to components
-    private InstructionMemory instructionMemoryRef;
-    private RegisterFileController registerControllerRef;
-    private DataMemoryController memoryControllerRef;
-    private ProgramCounter pcRef;
+    private final Timer simulationTimer;
+    private int simulationDelayMs = 500; 
 
     // Microsteps for simulation
     private List<MicroStep> microSteps; 
@@ -82,25 +64,16 @@ public class SimulationView extends JFrame implements ActionListener, ChangeList
      */
     public SimulationView(SimulatorEngine engine) {
         setTitle("LEGv8 Simulator");
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(1800, 1024); 
-        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setLocationRelativeTo(null);
-
+        setLayout(new BorderLayout());
         initComponents();
         layoutComponents();
 
-        simulationTimer = new Timer(simulationDelayMs, e -> {});    
+        simulationTimer = new Timer(simulationDelayMs, e -> stepExecution());    
         simulationTimer.setInitialDelay(simulationDelayMs);
         simulationTimer.setDelay(simulationDelayMs);
-
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                handleCloseView();
-            }
-        });
-
-        setSimulatorEngine(engine); 
     }
 
 
@@ -117,15 +90,6 @@ public class SimulationView extends JFrame implements ActionListener, ChangeList
         btnResetIns = new JButton("Reset Step");
         btnNextIns = new JButton("Next Instruction");
         btnResetProgram = new JButton("Reset Program");
- 
-        // Initialize speed slider
-        speedSlider = new JSlider(JSlider.HORIZONTAL, 0, 500, 500 - simulationDelayMs); 
-        speedSlider.setMajorTickSpacing(100);
-        speedSlider.setMinorTickSpacing(25);
-        speedSlider.setPaintTicks(true);
-        speedSlider.setPaintLabels(true); 
-        speedSlider.setToolTipText("Simulation Speed (Slower <-> Faster)");
-        lblSpeed = new JLabel("Speed:", JLabel.RIGHT);
         
         // Initialize buttons for showing/hiding views
         btnShowRegisters = new JButton("Registers");
@@ -151,7 +115,7 @@ public class SimulationView extends JFrame implements ActionListener, ChangeList
         btnResetIns.addActionListener(this);
         btnNextIns.addActionListener(this);
         btnResetProgram.addActionListener(this);
-        speedSlider.addChangeListener(this);
+        // speedSlider.addChangeListener(this);
         btnShowRegisters.addActionListener(this);
         btnShowMemory.addActionListener(this);
         btnShowInstructions.addActionListener(this);
@@ -215,10 +179,6 @@ public class SimulationView extends JFrame implements ActionListener, ChangeList
         controlPanel.add(new JSeparator(SwingConstants.HORIZONTAL), gbc);
         gbc.insets = new Insets(2, 5, 2, 5);
         
-        JPanel speedPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
-        speedPanel.add(lblSpeed); 
-        controlPanel.add(speedSlider, gbc);
-        
         gbc.insets = new Insets(10, 0, 10, 0);
         controlPanel.add(new JSeparator(SwingConstants.HORIZONTAL), gbc);
         gbc.insets = new Insets(2, 5, 2, 5);
@@ -233,113 +193,35 @@ public class SimulationView extends JFrame implements ActionListener, ChangeList
         add(lblStatus, BorderLayout.SOUTH);     
     }
 
-    /**
-     * Sets the simulator engine and its components.
-     * @param engine The SimulatorEngine to be set.
-     */
-    // This method initializes the components of the simulation view with the engine's components.
-    public void setSimulatorEngine(SimulatorEngine engine) {
-        this.simulatorEngine = Objects.requireNonNull(engine, "SimulatorEngine cannot be null.");
-        
-        setComponents(
-            engine.getInstructionMemory(),
-            engine.getRegisterController(),
-            engine.getDataMemoryController(),
-            engine.getProgramCounter()
-        );
-
-        if (datapathCanvas != null) {
-            datapathCanvas.setSimulationSpeedDelay(this.simulationDelayMs);
-        }
-
-        resetSimulationState(); 
-        System.out.println(ColoredLog.SUCCESS + "SimulationView: Engine and components set.");
-    }
-
-    // --- Setters for components and simulation state ---
-
-    /**
-     * Sets the references to the components used in the simulation.
-     * @param iMem The InstructionMemory reference.
-     * @param rfc The RegisterFileController reference.
-     * @param dmc The DataMemoryController reference.
-     * @param pc The ProgramCounter reference.
-     */
-    private void setComponents(InstructionMemory iMem, RegisterFileController rfc, DataMemoryController dmc, ProgramCounter pc) {
-        this.instructionMemoryRef = iMem;
-        this.registerControllerRef = rfc;
-        this.memoryControllerRef = dmc;
-        this.pcRef = pc;
-    }
-
-    /**
-     * Resets the simulation state, stopping the timer and updating the status label.
-     */
-    public void resetSimulationState() {
-        simulationTimer.stop();
-        isPaused = true;
-        lblStatus.setText(simulatorEngine != null ? "Status: Reset / Idle" : "Status: No Engine");
-        
-        updateAllStateViews(); 
-        updateDefaultState();
-
-        currentMicroStepIndex = -1;
-
-        if (datapathCanvas != null) {
-            datapathCanvas.resetState();
-        }
-    }
-
-    /**
-     * Updates all state views (registers, memory, instructions) based on the current microstep.
-     */
-    private void updateAllStateViews() {
-        if (simulatorEngine == null || microSteps == null) return;
-        if (microSteps.isEmpty() || currentMicroStepIndex < 0 || currentMicroStepIndex >= microSteps.size()) {     
+    private void updateStateViews() {
+        if (microSteps == null) return;
+        int idx = currentMicroStepIndex;
+        if (microSteps.isEmpty() || currentMicroStepIndex >= microSteps.size()) {
             return;
         }
 
-        MicroStep currentMicroStep = microSteps.get(currentMicroStepIndex);        
-        Set<ComponentID> activeComponents = new HashSet<>();
-        Set<BusID> activeBuses = new HashSet<>();
-
-        if (currentMicroStep != null && currentMicroStep.stepInfo() != null) {
-            for (StepInfo info : currentMicroStep.stepInfo()) {
-                if (info.startComponent() != null) {
-                    activeComponents.add(info.startComponent());
-                }
-                if (info.endComponent() != null) {
-                    activeComponents.add(info.endComponent());
-                }
-                if (info.bus() != null) {
-                    activeBuses.add(info.bus());
-                }
-            }
-        }
-        
-        if (registerView != null && registerView.isVisible()) {
-            RegisterStorage regStorage = (currentMicroStep != null) ? currentMicroStep.registerStorage() : registerControllerRef.getStorage(); 
-            int lastChangedReg = -1; 
-            registerView.updateData(regStorage, lastChangedReg);
-        }
-        
-        if (memoryView != null && memoryView.isVisible()) {
-            MemoryStorage memStorage = (currentMicroStep != null) ? currentMicroStep.memoryStorage() : memoryControllerRef.getStorage();
-            long lastChangedAddr = -1L; 
-            memoryView.updateData(memStorage, lastChangedAddr); 
+        if (idx < 0) {
+            idx = 0;
         }
 
-        if (instructionView != null && instructionView.isVisible()) {
-            long pcAddr = (currentMicroStep != null) ? currentMicroStep.programCounter() : pcRef.getCurrentAddress();
-            instructionView.updateData(simulatorEngine.getInstructionMemory(), pcAddr); 
+        MicroStep currentStep = microSteps.get(idx);
+
+        if (currentMicroStepIndex >= 0 && datapathCanvas != null) {
+            datapathCanvas.updateState(currentStep);
         }
-        
-        if (datapathCanvas != null) {
-            datapathCanvas.updateState(currentMicroStep); 
+
+        if (registerView != null) {
+            registerView.updateData(currentStep.registerStorage(), -1);
+        }
+
+        if (memoryView != null) {
+            memoryView.updateData(currentStep.memoryStorage(), -1L);
+        }
+
+        if (instructionView != null) {
+            instructionView.updateData(simulatorEngine.getInstructionMemory(), currentStep.programCounter());
         }
     }
-
-
     // --- ActionListener and ChangeListener methods ---
 
     /**
@@ -373,109 +255,89 @@ public class SimulationView extends JFrame implements ActionListener, ChangeList
         }
     }
 
-    /**
-     * Handles changes in the speed slider for simulation speed adjustment.
-     * @param e The ChangeEvent triggered by the slider change.
-     */
-    @Override
-    public void stateChanged(ChangeEvent e) {
-        if (e.getSource() == speedSlider && !speedSlider.getValueIsAdjusting()) {
-            int sliderValue = speedSlider.getValue();            
-            int maxDelay = 1001; 
-            int minDelay = 1;   
-
-            simulationDelayMs = maxDelay - (sliderValue * (maxDelay - minDelay) / 500);
-            simulationDelayMs = Math.max(minDelay, simulationDelayMs); 
-
-            if (datapathCanvas != null) {
-                datapathCanvas.setSimulationSpeedDelay(simulationDelayMs);
-            }
-            System.out.println(ColoredLog.SUCCESS + "Simulation Delay set to: " + simulationDelayMs + " ms (Slider: " + sliderValue + ")");
-        }
-    }
 
     // --- State Update Methods ---
 
     /**
      * Updates the state of the simulation view based on the current simulation state.
      */
-    void updateDefaultState() {
+    void updateDefaultButton() {
         this.isStep = false;
         this.isPaused = true;
         btnPause.setText("Pause");
-        updateControlState(true, false, false, true, true, true, true);
+        updateControlButton(true, false, false, true, true, true, true);
     }
 
     /**
      * Updates the state of the simulation view when the simulation is running.
      */
-    void updateRuningState() {
+    void updateRunningButton() {
         this.isStep = false;
         this.isPaused = false;
-        updateControlState(false, true, false, true, true, true, true);
+        updateControlButton(false, true, false, true, true, true, true);
     }
 
     /**
      * Updates the state of the simulation view when the simulation is paused.
      */
-    void updatePauseState() {
+    void updatePauseButton() {
         this.isStep = false;
         this.isPaused = true;
-        updateControlState(false, false, true, true, true, true, true);
+        updateControlButton(false, false, true, true, true, true, true);
     }
 
     /**
      * Updates the state of the simulation view when the simulation is resumed.
      */
-    void updateResumeState() {
+    void updateResumeButton() {
         this.isStep = false;
         this.isPaused = false;
-        updateControlState(false, true, false, true, true, true, true);
+        updateControlButton(false, true, false, true, true, true, true);
     }
 
     /**
      * Updates the state of the simulation view when the simulation is in step-by-step mode.
      */
-    void updateStepByStepState() {
+    void updateStepByStepButton() {
         this.isStep = true;
         this.isPaused = false;
-        updateControlState(true, false, false, true, true, true, true);
+        updateControlButton(true, false, false, true, true, true, true);
     }
 
     /**
      * Updates the state of the simulation view when the instruction step is reset.
      */
-    void updateResetStepState() {
+    void updateResetStepButton() {
         this.isStep = false;
         this.isPaused = false;
-        updateControlState(true, false, false, true, true, true, true);
+        updateControlButton(true, false, false, true, true, true, true);
     }
 
     /**
      * Updates the state of the simulation view when the next instruction is executed.
      */
-    void updateNextInstructionState() {
+    void updateNextInstructionButton() {
         this.isStep = false;
         this.isPaused = false;
-        updateControlState(true, false, false, true, true, true, true);
+        updateControlButton(true, false, false, true, true, true, true);
     }
 
     /**
      * Updates the state of the simulation view when the program is reset.
      */
-    void updateResetProgramState() {
+    void updateResetProgramButton() {
         this.isStep = false;
         this.isPaused = false;
-        updateControlState(true, false, false, true, true, true, true);
+        updateControlButton(true, false, false, true, true, true, true);
     }
 
     /**
      * Updates the state of the simulation view when the simulation ends.
      */
-    void updateEndRunningState() {
+    void updateEndRunningButton() {
         this.isStep = false;
         this.isPaused = true;
-        updateControlState(true, false, false, true, true, true, true);
+        updateControlButton(true, false, false, true, true, true, true);
     }
 
     /**
@@ -488,7 +350,7 @@ public class SimulationView extends JFrame implements ActionListener, ChangeList
      * @param canNextIns Indicates if the Next Instruction button should be enabled.
      * @param canResetProgram Indicates if the Reset Program button should be enabled.
      */
-    private void updateControlState(boolean canRun, boolean canPause, boolean canResume, boolean canStepByStep, boolean canResetStep, boolean canNextIns, boolean canResetProgram) {
+    private void updateControlButton(boolean canRun, boolean canPause, boolean canResume, boolean canStepByStep, boolean canResetStep, boolean canNextIns, boolean canResetProgram) {
         btnRun.setEnabled(canRun);
         btnPause.setEnabled(canPause || canResume); 
         btnPause.setText(isPaused ? "Resume" : "Pause");
@@ -522,6 +384,16 @@ public class SimulationView extends JFrame implements ActionListener, ChangeList
         setVisible(false);
     }
 
+    private void stepExecution() {
+        currentMicroStepIndex++;
+        if (currentMicroStepIndex >= microSteps.size()) {
+            simulationTimer.stop();
+            lblStatus.setText("Status: Completed");
+        } else {
+            updateStateViews();
+        }
+}
+
     /**
      * Starts the simulation by executing microsteps.
      * If the simulation is already running or halted, it shows an error message.
@@ -535,37 +407,23 @@ public class SimulationView extends JFrame implements ActionListener, ChangeList
             JOptionPane.showMessageDialog(this, "Simulation is already running.", "Warning", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        if (simulatorEngine.isHalted()) {
-            JOptionPane.showMessageDialog(this, "Simulation is halted. Please reset to continue.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
 
-        isPaused = false;
         lblStatus.setText("Status: Running");
-        updateRuningState();
+        updateRunningButton();
 
-        simulationTimer.start(); 
+        simulationTimer.start();
+        simulationTimer.setInitialDelay(simulationDelayMs);
+        simulationTimer.setDelay(simulationDelayMs);
+        
         try {
             if (microSteps == null) {
-                microSteps = simulatorEngine.stepAndGetMicroSteps();
-            } 
-            
-            simulationTimer.addActionListener(e -> {
-                currentMicroStepIndex++;
-                if (currentMicroStepIndex > microSteps.size() - 1) {        
-                    simulationTimer.stop();
-                    System.out.println(ColoredLog.END_PROCESS + "Simulation completed.");
-                } else {
-                    System.out.println(ColoredLog.START_PROCESS + "Executing microstep: " + (currentMicroStepIndex) + " / " + microSteps.size());
-                    System.out.println(microSteps.get(currentMicroStepIndex).toString());
-                    updateAllStateViews(); 
-                }
-            });
+                microSteps = simulatorEngine.getMicroSteps();
+            }
         } catch (SimulationException e) {
             JOptionPane.showMessageDialog(this, "Error during simulation: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             simulationTimer.stop(); 
             lblStatus.setText("Status: Paused");
-            updateResetStepState();
+            updateResetStepButton();
             return;
         }
     }
@@ -579,12 +437,12 @@ public class SimulationView extends JFrame implements ActionListener, ChangeList
             JOptionPane.showMessageDialog(this, "No simulator engine available.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        updatePauseState();
-        
-        simulationTimer.stop(); 
+        updatePauseButton();
+
+        simulationTimer.stop();
         lblStatus.setText("Status: Paused");
 
-        updateAllStateViews();
+        // updateStateViews();
     }
 
     /**
@@ -596,12 +454,13 @@ public class SimulationView extends JFrame implements ActionListener, ChangeList
             JOptionPane.showMessageDialog(this, "No simulator engine available.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        updateResumeState();
+        updateResumeButton();
 
         simulationTimer.start(); 
+        simulationTimer.setInitialDelay(simulationDelayMs);
+        simulationTimer.setDelay(simulationDelayMs);
+        
         lblStatus.setText("Status: Resuming...");
-
-        updateAllStateViews();
     }
 
     /**
@@ -615,7 +474,7 @@ public class SimulationView extends JFrame implements ActionListener, ChangeList
         }
         try {
             if (microSteps == null) {
-                microSteps = simulatorEngine.stepAndGetMicroSteps();
+                microSteps = simulatorEngine.getMicroSteps();
             }
         } catch (SimulationException e) {
             JOptionPane.showMessageDialog(this, "Error during simulation: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -627,17 +486,13 @@ public class SimulationView extends JFrame implements ActionListener, ChangeList
         }
 
         if (!isStep) {
-            updateStepByStepState();
-        } else {
-            if (currentMicroStepIndex >= microSteps.size() - 1) {
-                resetSimulationState();
-            }
-        }
+            updateStepByStepButton();
+        } 
+
         currentMicroStepIndex++;
 
         System.out.println(ColoredLog.START_PROCESS + "Executing microstep: " + (currentMicroStepIndex) + " / " + microSteps.size());
-        System.out.println(ColoredLog.INFO + microSteps.get(currentMicroStepIndex).toString());
-        updateAllStateViews();
+        updateStateViews();
     }
 
     /**
@@ -650,9 +505,23 @@ public class SimulationView extends JFrame implements ActionListener, ChangeList
             return;
         }
 
-        resetSimulationState();
+        
         lblStatus.setText("Status: Instruction Step Reset");
-        updateAllStateViews();
+        
+        if (simulationTimer.isRunning()) {
+            simulationTimer.stop(); 
+        }
+
+        microSteps.clear();
+        microSteps = simulatorEngine.getMicroStepsWithoutStep(); 
+        currentMicroStepIndex = -1; 
+        
+        if (datapathCanvas != null) {
+            datapathCanvas.resetState(); 
+        }
+        
+        updateResetStepButton();
+        updateStateViews();
     }
 
     /**
@@ -664,15 +533,26 @@ public class SimulationView extends JFrame implements ActionListener, ChangeList
             JOptionPane.showMessageDialog(this, "No simulator engine available.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
+
+        if (simulationTimer.isRunning()) {
+            simulationTimer.stop(); 
+        }
+        
         try {
-            if (microSteps != null) microSteps.clear();
-            microSteps = simulatorEngine.stepAndGetMicroSteps();
+            microSteps.clear();
+            microSteps = simulatorEngine.getMicroSteps();
         } catch (SimulationException e) {
             JOptionPane.showMessageDialog(this, "Error during simulation: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        resetSimulationState();
-        updateNextInstructionState();
+        
+        if (datapathCanvas != null) {
+            datapathCanvas.resetState(); 
+        }
+        
+        currentMicroStepIndex = -1;
+        updateNextInstructionButton();
+        updateStateViews();
     }
 
     /**
@@ -685,80 +565,62 @@ public class SimulationView extends JFrame implements ActionListener, ChangeList
             return;
         }
 
+        if (simulationTimer.isRunning()) {
+            simulationTimer.stop(); 
+        }
+
         simulatorEngine.reset();
-        if (microSteps != null) microSteps.clear();
+        microSteps.clear();
         try {
-            microSteps = simulatorEngine.stepAndGetMicroSteps();
+            microSteps = simulatorEngine.getMicroSteps();
         } catch (SimulationException e) {
             JOptionPane.showMessageDialog(this, "Error during simulation: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-       
+
+        currentMicroStepIndex = -1; 
+        if (datapathCanvas != null) {
+            datapathCanvas.resetState(); 
+        }
+        
+        updateResetProgramButton();
+        updateStateViews();
         lblStatus.setText("Status: Program Counter Reset");
-        updateResetProgramState();
-        resetSimulationState();
     }
 
     // --- View Toggle Methods ---
 
-    /**
-     * Toggles the visibility of the register view.
-     * If the register view is not available, it shows an error message.
-     * If the register view is already open, it brings it to the front.
-     * If the register view is not open, it creates a new instance and updates its data.
-     */
     private void toggleRegisterView() {
-        if (registerControllerRef == null) { showError("Register data not available."); return; }
         if (registerView == null) {
-            registerView = new RegisterView(this, registerControllerRef.getStorage());
-            registerView.updateData(registerControllerRef.getStorage(), -1); 
+            registerView = new RegisterView(this, simulatorEngine.getRegisterController().getStorage());
+            registerView.updateData(simulatorEngine.getRegisterController().getStorage(), -1);
         }
 
         registerView.setVisible(!registerView.isVisible());
         if (registerView.isVisible()) registerView.toFront();
-        
-        updateAllStateViews();
     }
 
-    /**
-     * Toggles the visibility of the memory view.
-     * If the memory view is not available, it shows an error message.
-     * If the memory view is already open, it brings it to the front.
-     * If the memory view is not open, it creates a new instance and updates its data.
-     */
     private void toggleMemoryView() {
-        if (memoryControllerRef == null) { showError("Memory data not available."); return; }
         if (memoryView == null) {
-            memoryView = new MemoryView(this, memoryControllerRef.getStorage());
-            memoryView.updateData(memoryControllerRef.getStorage(), -1L); 
+            memoryView = new MemoryView(this, simulatorEngine.getDataMemoryController().getStorage());
+            memoryView.updateData(simulatorEngine.getDataMemoryController().getStorage(), -1L);
         }
        
         memoryView.setVisible(!memoryView.isVisible());
         if (memoryView.isVisible()) memoryView.toFront();
-       
-        updateAllStateViews();
     }
 
-    /**
-     * Toggles the visibility of the instruction view.
-     * If the instruction view is not available, it shows an error message.
-     * If the instruction view is already open, it brings it to the front.
-     * If the instruction view is not open, it creates a new instance and updates its data.
-     */
     private void toggleInstructionView() {
-        if (instructionMemoryRef == null || pcRef == null) { showError("Instruction/PC data not available."); return; }
         if (instructionView == null) {
-            instructionView = new InstructionView(this, instructionMemoryRef);
-            instructionView.updateData(instructionMemoryRef, pcRef.getCurrentAddress()); 
+            instructionView = new InstructionView(this, simulatorEngine.getInstructionMemory());
+            instructionView.updateData(simulatorEngine.getInstructionMemory(), simulatorEngine.getProgramCounter().getCurrentAddress());
         }
        
         instructionView.setVisible(!instructionView.isVisible());
         if (instructionView.isVisible()) {
             instructionView.toFront();
-            instructionView.highlightPCRow(pcRef.getCurrentAddress()); 
+            instructionView.highlightPCRow(simulatorEngine.getProgramCounter().getCurrentAddress());
         }
-       
-        updateAllStateViews();
     }
 
     // --- Helper Methods for Error Handling ---
@@ -771,5 +633,5 @@ public class SimulationView extends JFrame implements ActionListener, ChangeList
         JOptionPane.showMessageDialog(this, message, "Simulation Error", JOptionPane.ERROR_MESSAGE);
         lblStatus.setText("Status: Error");
     }
-    
+
 }

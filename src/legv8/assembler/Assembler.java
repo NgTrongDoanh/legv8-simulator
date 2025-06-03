@@ -20,7 +20,7 @@ import java.util.Map;
  * A two-pass assembler for a subset of LEGv8 assembly language.
  * Pass 1 builds a symbol table mapping labels to memory addresses.
  * Pass 2 uses the symbol table and an InstructionFactory to generate
- * the corresponding Instruction objects (containing bytecode).
+ * the corresponding Instruction objects.
  */
 public class Assembler {
     // --- State ---
@@ -49,6 +49,7 @@ public class Assembler {
         this.symbolTable = new HashMap<>();
         this.processedLines = new ArrayList<>();
         this.errors = new ArrayList<>();
+
         System.out.println(ColoredLog.INFO + "Assembler initialized with base address: 0x" + Long.toHexString(baseAddress));
     }
     
@@ -57,8 +58,7 @@ public class Assembler {
 
     /**
      * Resets the assembler's internal state, clearing the symbol table,
-     * processed lines buffer, and any recorded errors. Should be called
-     * before assembling a new set of lines.
+     * processed lines buffer, and any recorded errors.
      */
     public void reset() {
         symbolTable.clear();
@@ -67,6 +67,7 @@ public class Assembler {
     }
 
     /**
+     * 
      * Assembles a list of assembly code lines into a list of executable Instruction objects.
      * Executes the two passes of the assembly process.
      * @param assemblyLines A List of strings, where each string is a line of LEGv8 assembly code
@@ -235,6 +236,7 @@ public class Assembler {
     private void addError(int lineNumber, String message, String lineContent) {
         String formattedError = formatError(lineNumber, message, lineContent);
         errors.add(formattedError);
+
         System.err.println(ColoredLog.ERROR + formattedError); 
     }
 
@@ -245,9 +247,9 @@ public class Assembler {
     private String aggregateErrors() {
         if (errors.isEmpty()) return "Assembly successful.";
        
-        StringBuilder sb = new StringBuilder(ColoredLog.FAILURE + "Assembly failed with " + errors.size() + " error(s):\n");
+        StringBuilder sb = new StringBuilder("Assembly failed with " + errors.size() + " error(s):\n");
         for (String err : errors) {
-            sb.append(ColoredLog.INFO + "  - ").append(err).append("\n");
+            sb.append("  - ").append(err).append("\n");
         }
         
         return sb.toString();
