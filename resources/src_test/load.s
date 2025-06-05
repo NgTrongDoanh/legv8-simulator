@@ -1,2 +1,0 @@
-MOVZ X0, #0x50, LSL #16
-LDUR X1, [X0, #0]
