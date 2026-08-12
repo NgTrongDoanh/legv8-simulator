@@ -32,7 +32,7 @@
 
 //     public static void main(String[] args) {
 //         InstructionConfigLoader configLoader = new InstructionConfigLoader();
-//         if (!configLoader.loadConfig(".//resources/config/instructions_config.csv")) { System.err.println("FATAL: Config load failed."); return; }
+//         if (!configLoader.loadConfig("resources/config/instructions.csv")) { System.err.println("FATAL: Config load failed."); return; }
 //         InstructionFactory.initialize(configLoader);
 
         

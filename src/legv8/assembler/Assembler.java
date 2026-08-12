@@ -26,6 +26,7 @@ public class Assembler {
     // --- State ---
     private final Map<String, Long> symbolTable; 
     private final List<String> processedLines; 
+    private final List<Integer> processedLineNumbers;
     private final List<String> errors;
     private final long baseAddress;
 
@@ -48,6 +49,7 @@ public class Assembler {
         this.baseAddress = baseAddress;
         this.symbolTable = new HashMap<>();
         this.processedLines = new ArrayList<>();
+        this.processedLineNumbers = new ArrayList<>();
         this.errors = new ArrayList<>();
 
         System.out.println(ColoredLog.INFO + "Assembler initialized with base address: 0x" + Long.toHexString(baseAddress));
@@ -63,6 +65,7 @@ public class Assembler {
     public void reset() {
         symbolTable.clear();
         processedLines.clear();
+        processedLineNumbers.clear();
         errors.clear();
     }
 
@@ -135,17 +138,26 @@ public class Assembler {
             
             if (processed.isEmpty()) continue;
 
-            if (processed.endsWith(":")) { 
-                String label = processed.substring(0, processed.length() - 1).trim();
+            int colonIndex = processed.indexOf(':');
+            if (colonIndex >= 0) {
+                String label = processed.substring(0, colonIndex).trim();
                 
                 if (!isValidLabel(label)) throw new AssemblyException(formatError(lineNumber, "Invalid label name: '" + label + "'", line));
                 
                 if (symbolTable.containsKey(label)) throw new AssemblyException(formatError(lineNumber, "Duplicate label definition: '" + label + "'", line));
 
                 symbolTable.put(label, currentAddress);
-            } else {
+
+                processed = processed.substring(colonIndex + 1).trim();
+                if (processed.indexOf(':') >= 0) {
+                    throw new AssemblyException(formatError(lineNumber, "Unexpected ':' after label '" + label + "'", line));
+                }
+            }
+
+            if (!processed.isEmpty()) {
                 processedLines.add(processed);
-                currentAddress += 4; 
+                processedLineNumbers.add(lineNumber);
+                currentAddress += 4;
             }
         }
     }
@@ -163,18 +175,18 @@ public class Assembler {
     private List<Instruction> generateInstructions() {
         List<Instruction> instructions = new ArrayList<>();
         long currentAddress = this.baseAddress;
-        int processedLineNumber = 0; 
+        int processedLineIndex = 0;
 
         for (String line : processedLines) {
-            processedLineNumber++;
+            int sourceLineNumber = processedLineNumbers.get(processedLineIndex++);
             
             try {    
                 Instruction instruction = InstructionFactory.createFromAssembly(line, symbolTable, currentAddress);
                 instructions.add(instruction);
             } catch (AssemblyException | IllegalArgumentException | IllegalStateException e) {    
-                addError(processedLineNumber, e.getMessage(), line);
+                addError(sourceLineNumber, e.getMessage(), line);
             } catch (Exception e) {
-                addError(processedLineNumber, "Unexpected error: " + e.getMessage(), line);
+                addError(sourceLineNumber, "Unexpected error: " + e.getMessage(), line);
                 e.printStackTrace(); 
             } finally {
                 currentAddress += 4; 

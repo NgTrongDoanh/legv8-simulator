@@ -40,7 +40,7 @@ endif
 
 SOURCES_LIST_FILE := $(BIN_DIR)/sources.list
 
-.PHONY: all build run clean help
+.PHONY: all build run test clean help
 
 all: build
 
@@ -108,6 +108,9 @@ else
 endif
 	@echo "--- Simulator Output End ---"
 
+test:
+	bash tests/run-tests.sh
+
 # Clean up build artifacts
 clean:
 	@echo "Cleaning up build artifacts..."
@@ -127,6 +130,7 @@ help:
 	@echo "  build         - Compile Java source files and copy resources."
 	@echo "  run           - Run the compiled application. Use ARGS=\"your_args\" to pass arguments."
 	@echo "                  Example: make run ARGS=\"-debug -file test.asm\""
+	@echo "  test          - Compile in a temporary directory and run regression tests."
 	@echo "  clean         - Remove build artifacts (the $(BIN_DIR) directory)."
 	@echo "  help          - Show this help message."
 	@echo ""

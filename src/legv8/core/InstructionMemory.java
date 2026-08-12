@@ -102,6 +102,17 @@ public class InstructionMemory {
     }
 
     /**
+     * Checks whether an instruction is mapped at the supplied byte address.
+     */
+    public boolean containsAddress(long byteAddress) {
+        if (byteAddress < ProgramCounter.BASE_ADDRESS) return false;
+        long offset = byteAddress - ProgramCounter.BASE_ADDRESS;
+        if (offset % INSTRUCTION_BYTES != 0) return false;
+        long index = offset / INSTRUCTION_BYTES;
+        return index >= 0 && index < instructions.size();
+    }
+
+    /**
      * Returns an unmodifiable list of instructions currently loaded in memory.
      * @return An unmodifiable list of instructions.
      */

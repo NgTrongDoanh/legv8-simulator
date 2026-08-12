@@ -6,7 +6,6 @@
 package legv8.instructions;
 
 import java.util.BitSet;
-import legv8.util.Extractor;
 
 /**
  * IFormatInstruction is a class that represents an immediate format instruction in the LEGv8 architecture.
@@ -38,7 +37,6 @@ public class IFormatInstruction extends Instruction {
     public String disassemble() {
         String mnemonic = definition.getMnemonic();
         
-        long signExtendedImm = Extractor.extend(this.immediate, 12);
-        return String.format("%-6s X%d, X%d, #%d", mnemonic, rd, rn, signExtendedImm);
+        return String.format("%-6s X%d, X%d, #%d", mnemonic, rd, rn, immediate);
     }
 }

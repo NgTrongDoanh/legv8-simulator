@@ -13,11 +13,16 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 public class InstructionConfigLoader {
+
+    private static final int BCOND_OPCODE_VALUE = 0b01010100;
 
     /**
      * A map that stores instruction definitions based on their opcode ID and format.
@@ -70,7 +75,7 @@ public class InstructionConfigLoader {
      * @return The map of opcode IDs to format maps and their corresponding InstructionDefinition objects.
      */
     public Map<String, InstructionDefinition> getMnemonicMap() {
-        return mnemonicMap; 
+        return Collections.unmodifiableMap(mnemonicMap);
     }
     
     /**
@@ -97,8 +102,8 @@ public class InstructionConfigLoader {
      * @return true if the configuration was loaded successfully, false otherwise.
      */
     public boolean loadConfig(String resourcePath) {
-        detailedDefinitionMap.clear();
-        mnemonicMap.clear();
+        Map<Integer, Map<Character, InstructionDefinition>> candidateDetailedDefinitionMap = new HashMap<>();
+        Map<String, InstructionDefinition> candidateMnemonicMap = new HashMap<>();
         System.out.println(ColoredLog.PENDING + "Loading instruction configuration from resource: " + resourcePath);
 
         try (InputStream is = new FileInputStream(resourcePath)) {
@@ -106,6 +111,7 @@ public class InstructionConfigLoader {
                 String line;
                 int lineNumber = 0;
                 boolean headerSkipped = false;
+                boolean hasErrors = false;
 
                 while ((line = reader.readLine()) != null) {
                     lineNumber++;
@@ -117,9 +123,17 @@ public class InstructionConfigLoader {
                         continue;
                     }
 
-                    String[] parts = line.split(",", -1); 
+                    String[] parts;
+                    try {
+                        parts = parseCsvLine(line).toArray(String[]::new);
+                    } catch (IllegalArgumentException e) {
+                        System.err.printf("%sConfigLoader ERROR line %d: %s%n", ColoredLog.FAILURE, lineNumber, e.getMessage());
+                        hasErrors = true;
+                        continue;
+                    }
                     if (parts.length != 16) { 
-                        System.err.printf("%sConfigLoader WARNING line %d: Incorrect field count (%d, expected 14). Skipping: %s\n", ColoredLog.WARNING, lineNumber, parts.length, line);
+                        System.err.printf("%sConfigLoader WARNING line %d: Incorrect field count (%d, expected 16). Skipping: %s\n", ColoredLog.WARNING, lineNumber, parts.length, line);
+                        hasErrors = true;
                         continue;
                     }
 
@@ -130,6 +144,7 @@ public class InstructionConfigLoader {
                         char formatChar = parseFormat(formatStr);
                         if (formatChar == '?') {
                             System.err.printf("%sConfigLoader WARNING line %d: Unknown format '%s' for %s. Skipping.\n", ColoredLog.WARNING, lineNumber, formatStr, mnemonic);
+                            hasErrors = true;
                             continue;
                         }
 
@@ -166,24 +181,46 @@ public class InstructionConfigLoader {
                             mnemonic, formatChar, opcode, signals
                         );
                         
-                        detailedDefinitionMap.computeIfAbsent(opcode, k -> new HashMap<>()).put(formatChar, definition);
-                        mnemonicMap.putIfAbsent(mnemonic, definition);
+                        if (candidateMnemonicMap.putIfAbsent(mnemonic, definition) != null) {
+                            throw new IllegalArgumentException("Duplicate mnemonic: " + mnemonic);
+                        }
+
+                        boolean isConditionalBranch = formatChar == 'C'
+                            && opcode == BCOND_OPCODE_VALUE
+                            && mnemonic.startsWith("B.");
+                        if (!isConditionalBranch) {
+                            Map<Character, InstructionDefinition> formatMap =
+                                candidateDetailedDefinitionMap.computeIfAbsent(opcode, k -> new HashMap<>());
+                            if (formatMap.putIfAbsent(formatChar, definition) != null) {
+                                throw new IllegalArgumentException(
+                                    "Duplicate opcode/format pair: " + opcodeIdStr + "/" + formatChar
+                                );
+                            }
+                        }
 
                     } catch (NumberFormatException e) {
+                        hasErrors = true;
                         System.err.printf("%sConfigLoader ERROR line %d: Invalid number format (OpcodeID?). Skipping: %s - %s\n", ColoredLog.FAILURE, lineNumber, line, e.getMessage());
                     } catch (ArrayIndexOutOfBoundsException e) {
+                        hasErrors = true;
                         System.err.printf("%sConfigLoader ERROR line %d: Missing fields. Skipping: %s\n", ColoredLog.FAILURE, lineNumber, line);
                     } catch (Exception e) { 
+                        hasErrors = true;
                         System.err.printf("%sConfigLoader ERROR line %d: Cannot parse line: %s - %s\n", ColoredLog.FAILURE, lineNumber, line, e.getMessage());
                     }
                 } 
                 
+                if (hasErrors || candidateMnemonicMap.isEmpty()) {
+                    System.err.println(ColoredLog.ERROR + "Instruction configuration contains errors; refusing to use a partial configuration.");
+                    return false;
+                }
+
                 System.out.printf("%sInstruction configuration loaded. %d unique mnemonics, %d opcode/format definitions.\n", 
-                                                            ColoredLog.SUCCESS, mnemonicMap.size(), countTotalDefinitions());
+                    ColoredLog.SUCCESS, candidateMnemonicMap.size(), countTotalDefinitions(candidateDetailedDefinitionMap));
 
                 System.out.println("--- Loaded Instruction Definitions ---");
 
-                detailedDefinitionMap.forEach((opcodeId, formatMap) -> {
+                candidateDetailedDefinitionMap.forEach((opcodeId, formatMap) -> {
                     System.out.printf("  Opcode ID %d: ", opcodeId);
                     formatMap.forEach((format, def) -> System.out.printf("%s (%s) ", def.getMnemonic(), format));
                     System.out.println();
@@ -192,9 +229,13 @@ public class InstructionConfigLoader {
                 System.out.println("-------------------------------------");
 
                 System.out.println("--- Loaded Mnemonics ---");
-                mnemonicMap.forEach((mnemonic, def) -> System.out.printf("  '%s' -> %s\n", mnemonic, def.getMnemonic()));
+                candidateMnemonicMap.forEach((mnemonic, def) -> System.out.printf("  '%s' -> %s\n", mnemonic, def.getMnemonic()));
                 System.out.println("-----------------------");
 
+                detailedDefinitionMap.clear();
+                detailedDefinitionMap.putAll(candidateDetailedDefinitionMap);
+                mnemonicMap.clear();
+                mnemonicMap.putAll(candidateMnemonicMap);
                 return true;
             } 
         } catch (IOException | NullPointerException e) { 
@@ -205,6 +246,35 @@ public class InstructionConfigLoader {
     }
 
     // --- Helper Methods ---
+
+    private List<String> parseCsvLine(String line) {
+        List<String> fields = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+        boolean inQuotes = false;
+
+        for (int i = 0; i < line.length(); i++) {
+            char c = line.charAt(i);
+            if (c == '"') {
+                if (inQuotes && i + 1 < line.length() && line.charAt(i + 1) == '"') {
+                    current.append('"');
+                    i++;
+                } else {
+                    inQuotes = !inQuotes;
+                }
+            } else if (c == ',' && !inQuotes) {
+                fields.add(current.toString());
+                current.setLength(0);
+            } else {
+                current.append(c);
+            }
+        }
+
+        if (inQuotes) {
+            throw new IllegalArgumentException("Unterminated quoted CSV field: " + line);
+        }
+        fields.add(current.toString());
+        return fields;
+    }
 
     /**
      * Parses the format string and returns the corresponding format character.
@@ -280,8 +350,10 @@ public class InstructionConfigLoader {
             }
             return Integer.parseInt(binStr.trim(), 2);
         } catch (NumberFormatException e) {
-            System.err.printf("%sConfigLoader WARNING: Invalid binary value '%s' for %s/%s. Assuming 0.\n", ColoredLog.WARNING, binStr, mnemonic, fieldName);
-            return 0; 
+            throw new IllegalArgumentException(
+                String.format("Invalid binary value '%s' for %s/%s.", binStr, mnemonic, fieldName),
+                e
+            );
         }
     }
 
@@ -289,9 +361,9 @@ public class InstructionConfigLoader {
      * Counts the total number of instruction definitions loaded.
      * @return The total count of instruction definitions.
      */
-    private int countTotalDefinitions() {
+    private int countTotalDefinitions(Map<Integer, Map<Character, InstructionDefinition>> definitions) {
         int count = 0;
-        for (Map<Character, InstructionDefinition> formatMap : detailedDefinitionMap.values()) {
+        for (Map<Character, InstructionDefinition> formatMap : definitions.values()) {
             count += formatMap.size();
         }
         return count;

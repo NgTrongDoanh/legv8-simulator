@@ -7,7 +7,7 @@ A visual LEGv8 CPU simulator implemented in Java, designed for educational purpo
 
 *   **Assembly Editor:** Built-in editor to write, open, and save LEGv8 assembly files (`.s`, `.asm`).
 *   **Instruction Set Configuration:**
-    *   Define LEGv8 instructions, their formats, opcodes, and control signals via a CSV file (`instructions_config.csv`).
+    *   Define LEGv8 instructions, their formats, opcodes, and control signals via a CSV file (`instructions.csv`).
     *   Supports R, I, D, B, CB (Conditional Branch & Compare and Branch), and IM (Immediate Move Wide) formats.
 *   **Visual Datapath Simulation:**
     *   Graphical representation of the LEGv8 single-cycle datapath.
@@ -61,7 +61,7 @@ A visual LEGv8 CPU simulator implemented in Java, designed for educational purpo
 ├── lib/                  # External libraries (e.g., Jackson for JSON if used)
 ├── resources/
 │   ├── config/
-│   │   └── instructions_config.csv   # Instruction definitions
+│   │   └── instructions.csv          # Instruction definitions
 │   ├── fonts/
 │   │   └── ... (font files)
 │   ├── images/
@@ -111,6 +111,12 @@ make run
 ```
 This will launch the main GUI application.
 
+### Test
+To compile in a temporary directory and run the regression suite:
+```bash
+make test
+```
+
 ### Clean
 To remove the `bin/` directory and other build artifacts:
 ```bash
@@ -125,7 +131,7 @@ make help
 
 ## Configuration
 
-### Instruction Set (`resources/config/instructions_config.csv`)
+### Instruction Set (`resources/config/instructions.csv`)
 This CSV file defines the LEGv8 instructions recognized by the simulator. You can modify or add instructions here. The columns are typically:
 `Mnemonic,Format,OpcodeID(Bin),RegW,ALUSrc,MemW,MemR,MemToReg,ZeroB,FlagB,UncondB,Reg2Loc,FlagW,ALUOperation(Enum),ALUControlOutput(Bin)`
 

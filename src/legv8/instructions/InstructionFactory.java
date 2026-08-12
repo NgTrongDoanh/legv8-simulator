@@ -292,8 +292,8 @@ public class InstructionFactory {
         int rn = parseRegister(ops[1]);
         int imm12 = parseImmediate(ops[2]);
         
-        if (imm12 < -2048 || imm12 > 2047) { 
-            throw new AssemblyException("Immediate value (#" + imm12 + ") out of 12-bit signed range [-2048, 2047]");
+        if (imm12 < 0 || imm12 > 4095) {
+            throw new AssemblyException("Immediate value (#" + imm12 + ") out of 12-bit unsigned range [0, 4095]");
         }
 
         Instruction.setBits(bits, opcode, 22, 31);
@@ -322,8 +322,8 @@ public class InstructionFactory {
 
         int rn = parseRegister(matcher.group(1));
         int imm9 = parseImmediate(matcher.group(2));
-        if (imm9 < 0 || imm9 > 511) { 
-            throw new AssemblyException("D-format offset (#" + imm9 + ") out of 9-bit unsigned range [0, 511]");
+        if (imm9 < -256 || imm9 > 255) {
+            throw new AssemblyException("D-format offset (#" + imm9 + ") out of 9-bit signed range [-256, 255]");
         }
 
         Instruction.setBits(bits, opcode, 21, 31);

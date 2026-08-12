@@ -93,9 +93,9 @@ echo "BUILD SUCCESSFUL!"
 echo "Output directory: $BIN_DIR"
 echo "To run (example, adjust main class):"
 echo "cd $BIN_DIR"
-echo "java -cp \".${CLASSPATH_SEP}../$LIB_DIR/*\" legv8.gui.Application" 
+echo "java -cp \".${CLASSPATH_SEP}../$LIB_DIR/*\" Application"
 echo "Or run from the project root:"
-echo "java -cp \"$BIN_DIR${CLASSPATH_SEP}$LIB_DIR/*\" legv8.gui.Application"
+echo "java -cp \"$BIN_DIR${CLASSPATH_SEP}$LIB_DIR/*\" Application"
 echo "---------------------"
 
 exit 0

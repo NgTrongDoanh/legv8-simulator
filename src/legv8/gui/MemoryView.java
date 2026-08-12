@@ -209,8 +209,7 @@ public class MemoryView extends StateDisplayFrame {
      * @param lastChangedAddrByte The last changed address in bytes to highlight.
      */
     public void updateData(MemoryStorage storage, long lastChangedAddrByte) {
-        updateViewWithCurrentRange(); 
-         
+        if (storage == null) return;
         long currentStart = parseAddressSilent(txtStartAddress.getText(), -1L); 
         long currentEnd = parseAddressSilent(txtEndAddress.getText(), -1L);
         

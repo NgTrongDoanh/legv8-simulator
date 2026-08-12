@@ -590,7 +590,7 @@ public class SimulatorEngine {
         if (mnemonic.equals("LDUR") || mnemonic.equals("STUR")) {
             readValue = memoryController.accessMemory_doubleWord(address, writeData, isWrite, isRead);
         } else if (mnemonic.equals("LDURSW") || mnemonic.equals("STURW")) {
-            readValue = memoryController.accessMemory_word(address, writeData, isWrite, isRead) & 0xFFFFFFFFL; // Ensure 32-bit word access
+            readValue = memoryController.accessMemory_word(address, writeData, isWrite, isRead);
         } else if (mnemonic.equals("LDURH") || mnemonic.equals("STURH")) {
             readValue = memoryController.accessMemory_halfword(address, writeData, isWrite, isRead) & 0xFFFFL; // Ensure 16-bit halfword access
         } else if (mnemonic.equals("LDURB") || mnemonic.equals("STURB")) {
@@ -634,7 +634,7 @@ public class SimulatorEngine {
         Objects.requireNonNull(instruction, "Instruction cannot be null.");
         boolean isBranchTaken = false;
         if (flagBranch == '1') {        
-            FlagBranchControl.FlagControl flagBranchControl = FlagBranchControl.getBranchCond(flagZ, flagV, flagN, flagC, instruction.getCond_CB());
+            FlagBranchControl.FlagControl flagBranchControl = FlagBranchControl.getBranchCond(flagN, flagZ, flagC, flagV, instruction.getCond_CB());
             
             StepInfo flagN_out = new StepInfo(
                 "[Flag_BrFlagAnd]: FLAG -> BR_FLAG_AND",
@@ -756,6 +756,10 @@ public class SimulatorEngine {
         return nextPC; // Return the next program counter value
     }
 
+    private void writeLinkRegister_execute(long linkAddress) {
+        registerController.writeRegister(RegisterStorage.LINK_REGISTER_INDEX, linkAddress, true);
+    }
+
     private long muxPCSrc_execute(long branchAddress, long nextPC, boolean isBranch) {
         long newPC = (isBranch) ? branchAddress : nextPC; // Mux PC Src logic
 
@@ -873,14 +877,22 @@ public class SimulatorEngine {
 
             brOr_execute(isBranch);
 
-            // Step 16: Shift Left 2
-            long shiftLeft2Value = shiftLeft2_execute(extendedValue);
+            long branchAddress;
+            if (definition.getMnemonic().equals("BR")) {
+                branchAddress = regValues[0];
+            } else {
+                // Step 16: Shift Left 2
+                long shiftLeft2Value = shiftLeft2_execute(extendedValue);
 
-            // Step 17: Branch Adder
-            long branchAddress = branchAdder_execute(currentPC, shiftLeft2Value);
+                // Step 17: Branch Adder
+                branchAddress = branchAdder_execute(currentPC, shiftLeft2Value);
+            }
 
             // Step 18: Adder4
             long nextPC = adder4_execute(currentPC);
+            if (definition.getMnemonic().equals("BL")) {
+                writeLinkRegister_execute(nextPC);
+            }
 
             // Step 19: Mux PC Src
             long finalPC = muxPCSrc_execute(branchAddress, nextPC, isBranch);

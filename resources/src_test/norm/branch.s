@@ -14,12 +14,12 @@ cb_target1:
     CBNZ X6, cb_target2    // should jump
     MOVZ X0, #0x8888       // trap
 cb_target2:
-    ADDI X31, X31, #3
+    ADDI XZR, XZR, #3
 
 // Test conditional branches (requires proper flag setting before)
     ADDS X1, X1, XZR       // set Z=0
     B.NE cond_target       // should jump
     MOVZ X0, #0x1234       // trap
 cond_target:
-    ADDI X31, X31, #3
+    ADDI XZR, XZR, #3
     

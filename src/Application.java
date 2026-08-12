@@ -39,6 +39,7 @@ public class Application extends JFrame implements ActionListener {
 
     // --- Core Logic & Data ---
     private InstructionConfigLoader configLoader;
+    private boolean configReady;
     private List<Instruction> loadedInstructions = null; 
     private SimulatorEngine simulatorEngine = null; 
 
@@ -101,10 +102,15 @@ public class Application extends JFrame implements ActionListener {
      */
     private void initComponents() {
         // Load default configuration
-        configLoader.loadConfig("./resources/config/instructions.csv"); 
-        InstructionFactory.initialize(configLoader); 
+        configReady = configLoader.loadConfig("./resources/config/instructions.csv");
+        if (configReady) {
+            InstructionFactory.initialize(configLoader);
+        }
 
-        lblStatus = new JLabel("Status: Load Assembly or change Config", SwingConstants.CENTER);
+        lblStatus = new JLabel(
+            configReady ? "Status: Load Assembly or change Config" : "Status: Load a valid instruction config",
+            SwingConstants.CENTER
+        );
         lblStatus.setBorder(BorderFactory.createEtchedBorder());
 
         // Create buttons
@@ -112,6 +118,8 @@ public class Application extends JFrame implements ActionListener {
         btnEditAssembly = new JButton("Edit Assembly..."); 
         btnStartSimulation = new JButton("Start Simulation");
         btnExit = new JButton("Exit Application");
+        btnEditAssembly.setEnabled(configReady);
+        btnStartSimulation.setEnabled(configReady);
 
         // Assign ActionListeners
         btnLoadConfig.addActionListener(this);
@@ -196,6 +204,11 @@ public class Application extends JFrame implements ActionListener {
             if (configLoader.loadConfig(resourcePath)) {
                 try {
                     InstructionFactory.initialize(configLoader); 
+                    configReady = true;
+                    loadedInstructions = null;
+                    if (assemblyEditor != null) assemblyEditor.invalidateAssembly();
+                    btnEditAssembly.setEnabled(true);
+                    btnStartSimulation.setEnabled(true);
                     
                     lblStatus.setText("Status: Config loaded. Load Assembly.");
                     System.out.println(ColoredLog.SUCCESS + "InstructionFactory initialized successfully.");
@@ -204,8 +217,13 @@ public class Application extends JFrame implements ActionListener {
                     lblStatus.setText("Status: Config loaded, but Factory init failed.");
                 }
             } else {
-                JOptionPane.showMessageDialog(this, "Failed to load Config from " + configFile.getName() + "\nCheck console for details.", "Config Error", JOptionPane.ERROR_MESSAGE);
-                lblStatus.setText("Status: Error loading Instruction Config.");
+                String retainedMessage = configReady
+                    ? "\nThe previous valid configuration is unchanged."
+                    : "\nNo valid configuration is currently loaded.";
+                JOptionPane.showMessageDialog(this, "Failed to load Config from " + configFile.getName() + retainedMessage, "Config Error", JOptionPane.ERROR_MESSAGE);
+                lblStatus.setText(configReady
+                    ? "Status: Invalid config rejected; previous config retained."
+                    : "Status: Load a valid instruction config.");
             }
             
         }
@@ -256,6 +274,10 @@ public class Application extends JFrame implements ActionListener {
      * 5. Creates or updates and displays the SimulationView window.
      */
     private void startSimulation() {
+        if (!configReady) {
+            JOptionPane.showMessageDialog(this, "Please load a valid instruction configuration first.", "Config Required", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
         if (!loadInstructionsFromEditor()) {
             System.err.println(ColoredLog.FAILURE + "Failed to load instructions from editor.");
             return;

@@ -93,8 +93,7 @@ public class Extractor {
 
             case 'I': 
                 rawValue = Instruction.extractBits(instructionBits, 10, 21);
-                numBits = 12;
-                break;
+                return Integer.toUnsignedLong(rawValue);
 
             case 'D': 
                 rawValue = Instruction.extractBits(instructionBits, 12, 20);
@@ -149,8 +148,7 @@ public class Extractor {
 
             case 'I': 
                 rawValue = (instruction >>> 10) & 0xFFF; 
-                numBits = 12;
-                break;
+                return Integer.toUnsignedLong(rawValue);
 
             case 'D': 
                 rawValue = (instruction >>> 12) & 0x1FF; 

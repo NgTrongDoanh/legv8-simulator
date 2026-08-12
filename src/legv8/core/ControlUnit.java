@@ -23,6 +23,8 @@ import java.util.Objects;
  */
 public class ControlUnit {
 
+    private static final int BCOND_OPCODE_VALUE = 0b01010100;
+
     // Loader providing the mapping from opcodes/mnemonics to InstructionDefinitions and ControlSignals. 
     private final InstructionConfigLoader configLoader;
 
@@ -87,7 +89,15 @@ public class ControlUnit {
         int opcodeId;
 
         opcodeId = extractBits(instructionBytecode, 24, 31);
-        definition = configLoader.getDefinition(opcodeId, 'C');
+        if (opcodeId == BCOND_OPCODE_VALUE) {
+            int conditionCode = extractBits(instructionBytecode, 0, 3);
+            String conditionMnemonic = getConditionMnemonic(conditionCode);
+            if (conditionMnemonic != null) {
+                definition = configLoader.getDefinitionByMnemonic("B." + conditionMnemonic);
+            }
+        } else {
+            definition = configLoader.getDefinition(opcodeId, 'C');
+        }
 
         if (definition == null) {
             opcodeId = extractBits(instructionBytecode, 23, 31);
@@ -150,5 +160,25 @@ public class ControlUnit {
      */
     private String formatBitSet(BitSet bits) {
         return legv8.instructions.Instruction.formatBitSet(bits);
+    }
+
+    private String getConditionMnemonic(int conditionCode) {
+        return switch (conditionCode & 0xF) {
+            case 0x0 -> "EQ";
+            case 0x1 -> "NE";
+            case 0x2 -> "HS";
+            case 0x3 -> "LO";
+            case 0x4 -> "MI";
+            case 0x5 -> "PL";
+            case 0x6 -> "VS";
+            case 0x7 -> "VC";
+            case 0x8 -> "HI";
+            case 0x9 -> "LS";
+            case 0xA -> "GE";
+            case 0xB -> "LT";
+            case 0xC -> "GT";
+            case 0xD -> "LE";
+            default -> null;
+        };
     }
 }

@@ -35,7 +35,7 @@ public class AssemblyEditor extends JFrame implements ActionListener {
     // Assembly-related variables
     private boolean hasUnsavedChanges = false;
     
-    private List<Instruction> instructions = null; 
+    private List<Instruction> instructions = List.of();
     private Assembler assembler = new Assembler(); 
 
     private Font textFont = new Font("Monospaced", Font.PLAIN, 14); // Font for the text area
@@ -202,6 +202,7 @@ public class AssemblyEditor extends JFrame implements ActionListener {
         }
 
         if (proceed) {
+            invalidateAssembly();
             try {
                 instructions = assembler.assemble(codeLines);
                 if (instructions != null) {         
@@ -368,6 +369,7 @@ public class AssemblyEditor extends JFrame implements ActionListener {
      * Updates the title of the window to indicate unsaved changes.
      */
     private void markChanged() {
+        invalidateAssembly();
         if (!hasUnsavedChanges) {
             hasUnsavedChanges = true;
             updateTitle(); 
@@ -414,6 +416,13 @@ public class AssemblyEditor extends JFrame implements ActionListener {
      * @return The current file.
      */
     public List<Instruction> getAssembledInstructions() {
-        return instructions;
+        return List.copyOf(instructions);
+    }
+
+    /**
+     * Invalidates generated instructions after source or configuration changes.
+     */
+    public void invalidateAssembly() {
+        instructions = List.of();
     }
 }

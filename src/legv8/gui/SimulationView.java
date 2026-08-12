@@ -64,7 +64,7 @@ public class SimulationView extends JFrame implements ActionListener {
      */
     public SimulationView(SimulatorEngine engine) {
         setTitle("LEGv8 Simulator");
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         setSize(1800, 1024); 
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
@@ -76,6 +76,9 @@ public class SimulationView extends JFrame implements ActionListener {
         simulationTimer = new Timer(simulationDelayMs, e -> stepExecution());    
         simulationTimer.setInitialDelay(simulationDelayMs);
         simulationTimer.setDelay(simulationDelayMs);
+        addWindowListener(new WindowAdapter() {
+            @Override public void windowClosing(WindowEvent e) { handleCloseView(); }
+        });
     }
 
 
@@ -383,18 +386,33 @@ public class SimulationView extends JFrame implements ActionListener {
         if (memoryView != null) memoryView.dispose();
         if (instructionView != null) instructionView.dispose();
         
-        setVisible(false);
+        dispose();
     }
 
     private void stepExecution() {
         currentMicroStepIndex++;
         if (currentMicroStepIndex >= microSteps.size()) {
-            simulationTimer.stop();
-            lblStatus.setText("Status: Completed");
+            long nextPC = simulatorEngine.getProgramCounter().getCurrentAddress();
+            if (!simulatorEngine.getInstructionMemory().containsAddress(nextPC)) {
+                simulationTimer.stop();
+                lblStatus.setText("Status: Completed");
+                updateEndRunningButton();
+                return;
+            }
+
+            try {
+                microSteps = simulatorEngine.getMicroSteps();
+                currentMicroStepIndex = 0;
+                updateStateViews();
+            } catch (SimulationException e) {
+                simulationTimer.stop();
+                showError("Error during simulation: " + e.getMessage());
+                updateEndRunningButton();
+            }
         } else {
             updateStateViews();
         }
-}
+    }
 
     /**
      * Starts the simulation by executing microsteps.
@@ -514,7 +532,7 @@ public class SimulationView extends JFrame implements ActionListener {
             simulationTimer.stop(); 
         }
 
-        microSteps.clear();
+        if (microSteps != null) microSteps.clear();
         microSteps = simulatorEngine.getMicroStepsWithoutStep(); 
         currentMicroStepIndex = -1; 
         
@@ -572,13 +590,8 @@ public class SimulationView extends JFrame implements ActionListener {
         }
 
         simulatorEngine.reset();
-        microSteps.clear();
-        try {
-            microSteps = simulatorEngine.getMicroSteps();
-        } catch (SimulationException e) {
-            JOptionPane.showMessageDialog(this, "Error during simulation: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+        if (microSteps != null) microSteps.clear();
+        microSteps = null;
 
         currentMicroStepIndex = -1; 
         if (datapathCanvas != null) {
@@ -586,8 +599,23 @@ public class SimulationView extends JFrame implements ActionListener {
         }
         
         updateResetProgramButton();
-        updateStateViews();
+        updateLiveStateViews();
         lblStatus.setText("Status: Program Counter Reset");
+    }
+
+    private void updateLiveStateViews() {
+        if (registerView != null) {
+            registerView.updateData(simulatorEngine.getRegisterController().getStorage(), -1);
+        }
+        if (memoryView != null) {
+            memoryView.updateData(simulatorEngine.getDataMemoryController().getStorage(), -1L);
+        }
+        if (instructionView != null) {
+            instructionView.updateData(
+                simulatorEngine.getInstructionMemory(),
+                simulatorEngine.getProgramCounter().getCurrentAddress()
+            );
+        }
     }
 
     // --- View Toggle Methods ---

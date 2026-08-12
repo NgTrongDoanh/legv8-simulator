@@ -6,6 +6,7 @@
 package legv8.instructions;
 
 import java.util.BitSet;
+import legv8.util.Extractor;
 
 /**
  * DFormatInstruction is a class that represents a data format instruction in the LEGv8 architecture.
@@ -36,6 +37,7 @@ public class DFormatInstruction extends Instruction {
     @Override
     public String disassemble() {
         String mnemonic = definition.getMnemonic();
-        return String.format("%-6s X%d, [X%d, #%d]", mnemonic, rt, rn, address);
+        long signedAddress = Extractor.extend(address, 9);
+        return String.format("%-6s X%d, [X%d, #%d]", mnemonic, rt, rn, signedAddress);
     }
 }
